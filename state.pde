@@ -3,6 +3,8 @@ class State {
 	PVector sposition;
 	PVector ssize;
 
+	int globId;
+
 	State () {
 		this.scolor = color(0, 0, 0);
 		this.sposition = new PVector();

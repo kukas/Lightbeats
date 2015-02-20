@@ -124,9 +124,37 @@ void draw() {
 			rect(boxArray[0], boxArray[1], boxArray[2], boxArray[3]);
 			noStroke();
 		}
+
+		// int list[][][] = m.globPixels();
+		// stroke(255, 0, 0);
+
+		// for(int i=0;i<list.length;i++){
+		// int[][] pixellist = list[i];
+		// if(pixellist!=null){
+		//   // beginShape(POINTS);
+		//   for(int j=0;j<pixellist.length;j++){
+		//   	if(j % 10 == 0)
+		//     	point( pixellist[j][0]  ,  pixellist[j][1] );
+		//     // vertex( pixellist[j][0]  ,  pixellist[j][1] );
+		//    // print( pixellist[j][0]  +" " +  pixellist[j][1] );
+		//   }
+		//   // endShape();
+		//  }
+		// }
+		//draw edge points (same as last, but vector based)
+		// int list[][][] = m.globEdgePoints(20);
+		// stroke(255, 0, 0);
+		// for(int i=0;i<list.length;i++){
+		// int[][] contour = list[i];
+		// if(contour!=null){
+		//   for(int j=0;j<contour.length - 1;j++){    
+		//     line( contour[j][0]  ,  contour[j][1], contour[j+1][0]  ,  contour[j+1][1] );
+		//   }
+		//  }
+		// }
 	}
 
-	balls.processGlobs(globArray);
+	balls.processGlobs(globArray, m.image());
 	balls.render();
 }
 
