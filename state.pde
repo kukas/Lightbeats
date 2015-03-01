@@ -4,6 +4,7 @@ class State {
 	PVector ssize;
 
 	int globId;
+	boolean precise = false;
 
 	State () {
 		this.scolor = color(0, 0, 0);

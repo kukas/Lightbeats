@@ -35,6 +35,11 @@ class Ball {
 		}
 		stateHistory.add(0, state);
 
+		stroke(0, 255, 0);
+		noFill();
+		ellipse(predictedState.sposition.x, predictedState.sposition.y, predictedState.ssize.x, predictedState.ssize.y);
+		noStroke();
+
 		update();
 	}
 
@@ -68,7 +73,7 @@ class Ball {
 		if(stateHistory.size() >= 1){
 			State state1 = getState(0); // poslední
 			predictedState.scolor = state1.scolor;
-			if(stateHistory.size() >= 2){
+			if(stateHistory.size() >= 3){
 				State state2 = getState(1); // předposlední
 
 				// predictedState.ssize.set(state1.ssize);
@@ -169,7 +174,12 @@ class Ball {
 		float[] sumPosition = new float[2];
 		float[] sumSize = new float[2];
 
-		for (State state : stateHistory) {
+		int count = min(stateHistory.size(), avgStateCount);
+		
+		// for (State state : stateHistory) {
+		for (int i=0; i<count; i++) {
+			State state = stateHistory.get(i);
+
 			sumColor[0] += red(state.scolor);
 			sumColor[1] += green(state.scolor);
 			sumColor[2] += blue(state.scolor);
@@ -179,7 +189,6 @@ class Ball {
 			sumSize[1] += state.ssize.y;
 		}
 
-		int count = stateHistory.size();
 		sumColor[0] /= count;
 		sumColor[1] /= count;
 		sumColor[2] /= count;
@@ -245,37 +254,41 @@ class Ball {
 		float dSizePerc = constrain((dSizeMax-dSize)/dSizeMax*sizeWeight, 0.0, sizeWeight);
 
 		// debugString = ""+round((dColorPerc + dPositionPerc + dPredictedPositionPerc + dSizePerc)*100.0)/100.0;
+		debugString = round((dColorPerc)*100.0)/100.0 + ";" +round((dPositionPerc)*100.0)/100.0 + ";" +round((dPredictedPositionPerc)*100.0)/100.0 + ";" +round((dSizePerc)*100.0)/100.0;
 
 		return dColorPerc + dPositionPerc + dPredictedPositionPerc + dSizePerc;
 	}
 
 	void render(){
-		if(ballProbability < 0.1)
-			return;
+		// if(ballProbability < 0.9)
+		// 	return;
 
-		for (State state : stateHistory) {
-			fill(red(state.scolor), green(state.scolor), blue(state.scolor));
-			ellipse(state.sposition.x, state.sposition.y, state.ssize.x, state.ssize.y);
-		}
+		// for (State state : stateHistory) {
+		// 	fill(red(state.scolor), green(state.scolor), blue(state.scolor));
+		// 	ellipse(state.sposition.x, state.sposition.y, state.ssize.x, state.ssize.y);
+		// }
 
-		if(debug){
+		if(debug && updated){
 			State state = getState();
 
-			fill(128, 0, 0, ballProbability*255);
-			ellipse(state.sposition.x, state.sposition.y, state.ssize.x, state.ssize.y);
+			// fill(128, 0, 0, 200);
 			noFill();
-			stroke(0, 255, 0);
-			ellipse(predictedState.sposition.x, predictedState.sposition.y, predictedState.ssize.x, predictedState.ssize.y);
+			stroke(255, 255, 255);
+			ellipse(state.sposition.x, state.sposition.y, state.ssize.x, state.ssize.y);
 			noStroke();
+			// stroke(0, 255, 0);
+			// ellipse(predictedState.sposition.x, predictedState.sposition.y, predictedState.ssize.x, predictedState.ssize.y);
+			// noStroke();
 
-			textAlign(CENTER, CENTER);
 			// zobrazení debug string
+			textAlign(CENTER, BOTTOM);
 			fill(255,255,255);
 			textSize(12);
-			text(debugString, state.sposition.x, state.sposition.y);
-			// zobrazení id
+			text(debugString, state.sposition.x, state.sposition.y-state.ssize.y/2);
+			textAlign(CENTER, CENTER);
+			// // zobrazení id
 			fill(0, 0, 255);
-			textSize(32);
+			textSize(28);
 			text(""+id, state.sposition.x, state.sposition.y);
 		}
 	}

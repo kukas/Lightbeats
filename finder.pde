@@ -118,12 +118,12 @@ class Finder {
 
 	Finder () {
 		mass            = 2;
-		step            = 0.11;
+		step            = 0.07;
 		prt             = 0.35;
-		np              = 10;
-		migrationsLimit = 70;
-		acceptedError   = 5;
-		d               = 6;
+		np              = 15;
+		migrationsLimit = 30;
+		acceptedError   = 1;
+		d               = 3;
 	}
 
 	Candidate[] getMinMax () {
@@ -142,16 +142,26 @@ class Finder {
 		return minmax;
 	}
 
-	Candidate migrate () {
+	void init () {
 		debugPerf = 0;
 
-		candidates = new Candidate[np];
+		if(d == 3){
+		// if(tips.length == 3){
+			prt = 0.5;
+		}
 
+		candidates = new Candidate[np];
 		for(int i=0; i<np; i++){
 			float[] values = new float[d];
 
 			for (int j = 0; j < d; j+=3) {
 				int[] p1 = globPixels[int(random(0, pointCount))];
+				// State b = tips[int(random(0, tips.length))].getState();
+
+				// values[j] = b.sposition.x + (p1[0] - b.sposition.x)*random(1);
+				// values[j+1] = b.sposition.y + (p1[1] - b.sposition.y)*random(1);
+				// values[j+2] = (b.ssize.x * b.ssize.y)*random(0.1, 0.5);
+
 				int[] p2 = globPixels[int(random(0, pointCount))];
 				values[j] = p2[0] + (p1[0] - p2[0])*random(1);
 				values[j+1] = p2[1] + (p1[1] - p2[1])*random(1);
@@ -173,7 +183,9 @@ class Finder {
 		// 	dd = sqrt(candidates[i].position.get(5))*2;
 		// 	ellipse(candidates[i].position.get(3), candidates[i].position.get(4), dd, dd);
 		// }
+	}
 
+	Candidate migrate () {
 		Candidate[] minmax = getMinMax();
 		int migrations = 0;
 		do {
@@ -181,42 +193,23 @@ class Finder {
 			minmax = getMinMax();
 		} while (++migrations < migrationsLimit && (minmax[1].error-minmax[0].error) > acceptedError);
 
-		balls.debugString = ""+(minmax[1].error-minmax[0].error);
+		// balls.debugString = ""+(minmax[1].error-minmax[0].error);
 		return minmax[0];
 	}
 
 	void migration (Candidate leader) {
-		// stroke(255, 255, 0);
-		// ellipse(leader.position.get(0), leader.position.get(1), leader.position.get(2), leader.position.get(2));
-		// fill(255,255,255);
-		// textSize(12);
-		// textAlign(LEFT, TOP);
-		// text(int(leader.error), leader.position.get(0)+leader.position.get(2), leader.position.get(1));
+		// stroke(255, 255, 0, 150);
 		// noFill();
+		// float dd = sqrt(leader.position.get(2))*2;
+		// ellipse(leader.position.get(0), leader.position.get(1), dd, dd);
+		// stroke(255, 0, 255, 150);
+		// dd = sqrt(leader.position.get(5))*2;
+		// ellipse(leader.position.get(3), leader.position.get(4), dd, dd);
 
 		for (Candidate candidate : candidates) {
 			candidate.follow(leader);
 		}
 
-	}
-
-	float fitCircle (VecN circles, int index) {
-		float error = 0;
-		int circle = index*3;
-
-		float[] errors = new float[d/3];
-		for (int j = 0; j < pointCount; j++) {
-			int[] p = globPixels[j];
-			float x = circles.get(circle+0);
-			float y = circles.get(circle+1);
-			float r2 = circles.get(circle+2);
-
-			float dx = p[0] - x;
-			float dy = p[1] - y;
-			error += abs(dx*dx + dy*dy - r2);
-		}
-
-		return error;
 	}
 
 	float fitCircles (VecN circles) {
@@ -225,52 +218,101 @@ class Finder {
 		float error = 0;
 
 		float[] errors = new float[d/3];
-		for (int j = 0; j < pointCount; j++) {
+		for (int j = 0; j < pointCount; j+=3) {
 			int[] p = globPixels[j];
 			for (int i = 0; i < d; i+=3) {
-				float x = circles.get(i+0);
+				float x = circles.get(i);
 				float y = circles.get(i+1);
 				float r2 = circles.get(i+2);
 
 				float dx = p[0] - x;
 				float dy = p[1] - y;
-				errors[i/3] = abs(dx*dx + dy*dy - r2);
+				// errors[i/3] = abs(dx*dx + dy*dy - r2);
+				float maxd = 256;
+				float d2 = dx*dx + dy*dy;
+				float dd2 = abs(d2 - r2);
+				errors[i/3] = dd2;
+				// if(d2 > r2){
+				// 	errors[i/3] *= dd2*0.1;
+				// 	errors[i/3] += dd2;
+				// }
+
+				if(dd2 > maxd){
+					errors[i/3] = maxd+0.15*dd2; //-1/dd2;
+				}
+				// else {
+					// errors[i/3] = sqrt(d);
+				// }
 			}
 			error += min(errors);
+		}
+
+		if(d > 3){
+			for (int i = 0; i < d; i+=3) {
+				float dx = circles.get(i) + circles.get((i+3)%d);
+				float dy = circles.get(i+1) + circles.get((i+4)%d);
+				error += dx*dx + dy*dy;
+			}
 		}
 
 		return error;
 	}
 
-	State[] findBalls (int[][] globPixels) {
+	ArrayList<State> findBalls (int[][] globPixels, int ballCount) {
 		this.globPixels = globPixels;
 		pointCount = globPixels.length;
+		// d = tips.length*3;
+		this.d = ballCount*3;
 
 		stroke(255, 0, 0);
-		for(int j=0;j<pointCount - 1;j++){    
-			line( globPixels[j][0]  ,  globPixels[j][1], globPixels[j+1][0]  ,  globPixels[j+1][1] );
+		// for (int[] p : globPixels) {
+		for (int i = 0; i < globPixels.length; i += 3) {
+			int[] p = globPixels[i];
+			point(p[0], p[1]);
 		}
+		// }
+
+		init();
 
 		Candidate leader = migrate();
-		balls.debugString += "\n"+debugPerf+": "+leader.error+"\n"+int(leader.position.get(0))+" "+int(leader.position.get(1))+" "+int(leader.position.get(2));
-		balls.debugString += "\n"+int(leader.position.get(3))+" "+int(leader.position.get(4))+" "+int(leader.position.get(5));
 
-		float d;
-		float fit0 = fitCircle(leader.position, 0);
-		float fit1 = fitCircle(leader.position, 1);
-		balls.debugString += "\n"+int(fit0)+" "+int(fit1);
-		// if(fit0 < 5000 || abs(fit0 - fit1) < 1000){
-			stroke(255, 255, 0);
-			d = 2*sqrt(leader.position.get(2));
-			ellipse(leader.position.get(0), leader.position.get(1), d, d);
-		// }
-		// if(fit1 < 5000 || abs(fit0 - fit1) < 1000){
-			stroke(255, 0, 255);
-			d = 2*sqrt(leader.position.get(5));
-			ellipse(leader.position.get(3), leader.position.get(4), d, d);
-		// }
-		noStroke();
+		ArrayList<State> foundStates = new ArrayList<State>();
 
-		return new State[1];
+		for(int i=0; i<d; i+=3){
+			int x = int(leader.position.get(i));
+			int y = int(leader.position.get(i+1));
+			int r = int(sqrt(leader.position.get(i+2)));
+			int dd = 2*r;
+
+			boolean duplicate = false;
+
+			for (State s : foundStates) {
+				// float dsize = abs(s.ssize.x - dd);
+				float dx = abs(s.sposition.x - x);
+				float dy = abs(s.sposition.y - y);
+
+				// pokud se souřadnicí liší alespoň o 5 pixelů
+				if(max(dx, dy) < 5){
+					duplicate = true;
+				}
+			}
+
+			if(!duplicate){
+				color globColor = m.average(x-r, y-r, dd, dd);
+				PVector globPosition = new PVector(x, y);
+				PVector globSize = new PVector(dd, dd);
+
+				State state = new State(globColor, globPosition, globSize);
+				state.precise = true;
+
+				noFill();
+				stroke(0, 0, 255);
+				ellipse(state.sposition.x, state.sposition.y, state.ssize.x, state.ssize.y);
+				noStroke();
+				foundStates.add(state);
+			}
+		}
+
+		return foundStates;
 	}
 };
