@@ -11,6 +11,8 @@ class Ball {
 
 	int id;
 
+	int timestamp;
+
 	State avgState;
 	State predictedState;
 
@@ -18,6 +20,7 @@ class Ball {
 
 	Ball (State state) {
 		id = ++ballCounter;
+		timestamp = frameTimestamp;
 
 		stateHistory = new ArrayList<State>();
 		avgState = new State();
@@ -47,7 +50,9 @@ class Ball {
 	// přidá vypočítaný stav
 	void predict () {
 		predictedStates++;
-		addState(new State(predictedState));
+		State state = new State(predictedState);
+		state.predicted = true;
+		addState(state);
 	}
 
 	void updateBall (State state) {

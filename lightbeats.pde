@@ -82,13 +82,15 @@ PImage debugView;
 // processing
 Balls balls;
 
+// view
+Renderer renderer;
 
 //-----------------------------------------------------------------------------------------------------------
 //SETUP
 
 void setup() {
-	size(camResX, camResY);
-	// size(displayWidth, displayHeight);
+	// size(camResX, camResY);
+	size(displayWidth, displayHeight);
 	
 	m = new JMyron();
 	m.start(camResX, camResY);
@@ -108,6 +110,9 @@ void setup() {
 		cp5.hide();
 
 	balls = new Balls();
+	renderer = new Renderer(balls);
+
+	renderer.init();
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -149,12 +154,22 @@ void draw() {
 	}
 
 	balls.processGlobs(globArray, m.image());
-	balls.render();
 
-	fill(255,255,0);
-	textSize(16);
-	textAlign(RIGHT, BOTTOM);
-	text(int(frameTimestamp), camResX-10, camResY-10);
+	if(debug){
+		balls.render();
+	}
+	popMatrix();
+
+	// if(!debug){
+		renderer.render();
+	// }
+
+	if(debug) {
+		fill(255,255,0);
+		textSize(16);
+		textAlign(RIGHT, BOTTOM);
+		text(int(frameTimestamp), width-10, height-10);
+	}
 
 	if(capture){
 		saveFrame("frames/####.tga");
@@ -164,10 +179,9 @@ void draw() {
 		fill(255,255,0);
 		textSize(16);
 		textAlign(RIGHT, TOP);
-		text(int(frameRate), camResX-10, 0);
+		text(int(frameRate), width-10, 0);
 	// }
 
-	popMatrix();
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------

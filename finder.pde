@@ -303,7 +303,6 @@ class Finder {
 				PVector globSize = new PVector(dd, dd);
 
 				State state = new State(globColor, globPosition, globSize);
-				state.precise = true;
 
 				noFill();
 				stroke(0, 0, 255);

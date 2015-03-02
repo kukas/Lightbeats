@@ -5,7 +5,7 @@ class State {
 	int timestamp;
 
 	int globId;
-	boolean precise = false;
+	boolean predicted = false;
 
 	State () {
 		this.scolor = color(0, 0, 0);
