@@ -17,6 +17,7 @@
  */
 
 import JMyron.*;
+import controlP5.*;
 
 //---------------------------------------------------------------
 // GLOBAL SETTINGS
@@ -29,6 +30,7 @@ float threshold = 130;
 
 // dev
 boolean debug = true;
+boolean capture = false;
 
 // view
 int ballStateCount = 10;
@@ -70,9 +72,8 @@ JMyron m;
 int[][] globArray;
 int[][][] globPixels;
 
-int program = -3; //controlling speed along x axis, on start stay static until UP or DOWN arrow keys are pressed; 
+ControlP5 cp5;
 
-boolean capture = false;
 int frameTimestamp;
 
 PImage debugView;
@@ -96,8 +97,13 @@ void setup() {
 	m.maxDensity(1000);
 	m.sensitivity(threshold);
 
-
 	debugView = createImage(camResX, camResY, ARGB);
+
+	cp5 = new ControlP5(this);
+	cp5.addButton("cameraSettings").setPosition(10,10).setSize(128,15);
+	cp5.addSlider("brightnessThreshold", 0, 255, threshold, 10, 40, 128, 15).setNumberOfTickMarks(256);
+	if(!debug)
+		cp5.hide();
 
 	balls = new Balls();
 }
@@ -106,10 +112,11 @@ void setup() {
 //DRAW
 
 void draw() {
-	scale(min(width/float(camResX), height/float(camResY)));
-	background(0); //Set background black
 	m.update();
 	frameTimestamp = millis();
+	
+	scale(min(width/float(camResX), height/float(camResY)));
+	background(0); //Set background black
 
 	globArray = m.globBoxes();
 
@@ -117,7 +124,6 @@ void draw() {
 		m.imageCopy(debugView.pixels);
 		debugView.updatePixels();
 		image(debugView, 0, 0);
-
 
 		// draw the glob bounding boxes
 		// for(int i = 0; i < globArray.length; i++) {
@@ -145,17 +151,6 @@ void draw() {
 				endShape();
 			}
 		}
-		//draw edge points (same as last, but vector based)
-		// int list[][][] = m.globEdgePoints(20);
-		// stroke(255, 0, 0);
-		// for(int i=0;i<list.length;i++){
-		// int[][] contour = list[i];
-		// if(contour!=null){
-		//   for(int j=0;j<contour.length - 1;j++){    
-		//     line( contour[j][0]  ,  contour[j][1], contour[j+1][0]  ,  contour[j+1][1] );
-		//   }
-		//  }
-		// }
 	}
 
 	balls.processGlobs(globArray, m.image());
@@ -164,38 +159,30 @@ void draw() {
 	if(capture){
 		saveFrame("frames/####.tga");
 	}
-
-	fill(255,255,0);
-	textSize(16);
-	textAlign(RIGHT, TOP);
-	text(int(frameRate), camResX-10, 0);
+	if(debug){
+		fill(255,255,0);
+		textSize(16);
+		textAlign(RIGHT, TOP);
+		text(int(frameRate), camResX-10, 0);
+	}
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //User input - calibrating camera and animation
 	
-void mousePressed(){
+void cameraSettings(){
 	m.settings();//click the window to get the settings of camera
+}
+
+void brightnessThreshold(float t){
+	threshold = t;
+	m.sensitivity(threshold);
 }
 
 //by pressing arrow key up and down you animate movement of previous frames along x axis 
 //(originally designed to flow in the left direction-UP arrow key or stay static - program value is 0)
 void keyPressed(){
 	switch(keyCode) {
-	case UP: 
-			program --;
-			break;
-	case DOWN: 
-			program ++;
-			break;
-	case LEFT: 
-			threshold --;
-			m.sensitivity(threshold);
-			break;
-	case RIGHT: 
-			threshold ++;
-			m.sensitivity(threshold);
-			break;
 	case ' ': 
 			saveFrame("diagram-####.jpg"); //tga is the fastest..but you can specify jpg,png...
 			break;
@@ -207,6 +194,11 @@ void keyPressed(){
 			break;
 	case 'D':
 			debug = !debug;
+			if(debug)
+				cp5.show();
+			else
+				cp5.hide();
+
 			break;
 	case 'C':
 			capture = !capture;
