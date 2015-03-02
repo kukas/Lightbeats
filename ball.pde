@@ -237,24 +237,24 @@ class Ball {
 		float dr = red(state.scolor) - red(avgState.scolor);
 		float dg = green(state.scolor) - green(avgState.scolor);
 		float db = blue(state.scolor) - blue(avgState.scolor);
-		float dColor = abs(dr) + abs(dg) + abs(db);
+		float dColor = (abs(dr) + abs(dg) + abs(db))/deltaTime;
 
 		float dColorPerc = constrain((dColorMax-dColor)/dColorMax*colorWeight, 0.0, colorWeight);
 
 		State lastState = getState();
 		float dx = state.sposition.x - lastState.sposition.x;
 		float dy = state.sposition.y - lastState.sposition.y;
-		float dPosition = dx*dx + dy*dy;
+		float dPosition = (dx*dx + dy*dy)/deltaTime;
 		float dPositionPerc = constrain((dPositionMax-dPosition)/dPositionMax*positionWeight, 0.0, positionWeight);
 
 		dx = state.sposition.x - predictedState.sposition.x;
 		dy = state.sposition.y - predictedState.sposition.y;
-		float dPredictedPosition = dx*dx + dy*dy;
+		float dPredictedPosition = (dx*dx + dy*dy)/deltaTime;
 		float dPredictedPositionPerc = constrain((dPredictedPositionMax-dPredictedPosition)/dPredictedPositionMax*predictedPositionWeight, 0.0, predictedPositionWeight);
 
 		dx = state.ssize.x - avgState.ssize.x;
 		dy = state.ssize.y - avgState.ssize.y;
-		float dSize = dx*dx + dy*dy;
+		float dSize = (dx*dx + dy*dy)/deltaTime;
 		float dSizePerc = constrain((dSizeMax-dSize)/dSizeMax*sizeWeight, 0.0, sizeWeight);
 
 		debugString = round((dColorPerc)*100.0)/100.0 + ";" +round((dPositionPerc)*100.0)/100.0 + ";" +round((dPredictedPositionPerc)*100.0)/100.0 + ";" +round((dSizePerc)*100.0)/100.0;

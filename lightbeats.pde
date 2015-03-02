@@ -43,16 +43,16 @@ float positionWeight = 0.5;
 float predictedPositionWeight = 0.5;
 float sizeWeight = 0.2;
 // - maximal values
-float dColorMax = 255;
-float dPositionMax = pow(80, 2);
-float dPredictedPositionMax = pow(50, 2);
-float dSizeMax = pow(20, 2);
+float dColorMax = 8;
+float dPositionMax = pow(16, 2);
+float dPredictedPositionMax = pow(10, 2);
+float dSizeMax = pow(4, 2);
 
 // prediction
 float correctionWeight = 0.5;
 
 // ball detection
-float ballProbabilityThreshold = 0.8; // po jaké hodnotě se glob považuje za míček
+float ballProbabilityThreshold = 0.5; // po jaké hodnotě se glob považuje za míček
 
 
 // zapne fullscreen
@@ -75,6 +75,7 @@ int[][][] globPixels;
 ControlP5 cp5;
 
 int frameTimestamp;
+int deltaTime;
 
 PImage debugView;
 
@@ -102,6 +103,7 @@ void setup() {
 	cp5 = new ControlP5(this);
 	cp5.addButton("cameraSettings").setPosition(10,10).setSize(128,15);
 	cp5.addSlider("brightnessThreshold", 0, 255, threshold, 10, 40, 128, 15).setNumberOfTickMarks(256);
+	cp5.addSlider("ballProbabilityThreshold", 0, 1, ballProbabilityThreshold, 10, 70, 128, 15);
 	if(!debug)
 		cp5.hide();
 
@@ -113,7 +115,9 @@ void setup() {
 
 void draw() {
 	m.update();
-	frameTimestamp = millis();
+	int now = millis();
+	deltaTime = now - frameTimestamp;
+	frameTimestamp = now;
 	
 	pushMatrix();
 
