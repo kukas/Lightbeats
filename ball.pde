@@ -4,7 +4,6 @@ class Ball {
 	ArrayList<State> stateHistory;
 	// počet zaznamenaných stavů
 	int historyLength = ballStateCount;
-	// jak moc jsme si jistí, že míček stále existuje?
 	// jak moc jsme si jistí, že je toto opravdu míček?
 	float ballProbability = 0.5;
 	int predictedStates = 0;
@@ -35,10 +34,12 @@ class Ball {
 		}
 		stateHistory.add(0, state);
 
-		stroke(0, 255, 0);
-		noFill();
-		ellipse(predictedState.sposition.x, predictedState.sposition.y, predictedState.ssize.x, predictedState.ssize.y);
-		noStroke();
+		if(debug){
+			stroke(0, 255, 0);
+			noFill();
+			ellipse(predictedState.sposition.x, predictedState.sposition.y, predictedState.ssize.x, predictedState.ssize.y);
+			noStroke();
+		}
 
 		update();
 	}
@@ -181,7 +182,6 @@ class Ball {
 
 		int count = min(stateHistory.size(), avgStateCount);
 		
-		// for (State state : stateHistory) {
 		for (int i=0; i<count; i++) {
 			State state = stateHistory.get(i);
 
@@ -219,14 +219,13 @@ class Ball {
 				State state = getState();
 				float avgDiff = PVector.sub(avgState.sposition, state.sposition).magSq();
 				// pokud se hýbe víc než 10px/frame
-				float minAvgDiff = pow(10, 2);
+				float minAvgDiff = 100;
 				ballProbability = ballProbability + (constrain(avgDiff/minAvgDiff, 0.0, 1.0) - ballProbability)*0.2;
 			}
 		}
 	}
 
 	void update () {
-		// updatePrediction();
 		updateAverages();
 
 		updateProbability();
@@ -258,41 +257,37 @@ class Ball {
 		float dSize = dx*dx + dy*dy;
 		float dSizePerc = constrain((dSizeMax-dSize)/dSizeMax*sizeWeight, 0.0, sizeWeight);
 
-		// debugString = ""+round((dColorPerc + dPositionPerc + dPredictedPositionPerc + dSizePerc)*100.0)/100.0;
 		debugString = round((dColorPerc)*100.0)/100.0 + ";" +round((dPositionPerc)*100.0)/100.0 + ";" +round((dPredictedPositionPerc)*100.0)/100.0 + ";" +round((dSizePerc)*100.0)/100.0;
 
 		return dColorPerc + max(dPositionPerc, dPredictedPositionPerc) + dSizePerc;
 	}
 
 	void render(){
-		// if(ballProbability < 0.9)
-		// 	return;
-
-		// for (State state : stateHistory) {
-		// 	fill(red(state.scolor), green(state.scolor), blue(state.scolor));
-		// 	ellipse(state.sposition.x, state.sposition.y, state.ssize.x, state.ssize.y);
-		// }
-
-		if(debug && updated){
+		if(debug){
 			State state = getState();
 
-			// fill(128, 0, 0, 200);
 			noFill();
-			stroke(255, 255, 255);
+			if(ballProbability == 1){
+				if(updated)
+					stroke(255, 255, 255);
+				else
+					stroke(255, 0, 0);
+			}
+			else
+				stroke(255, 255, 255, 128);
 			ellipse(state.sposition.x, state.sposition.y, state.ssize.x, state.ssize.y);
 			noStroke();
-			// stroke(0, 255, 0);
-			// ellipse(predictedState.sposition.x, predictedState.sposition.y, predictedState.ssize.x, predictedState.ssize.y);
-			// noStroke();
+
+			if(ballProbability < 1)
+				return;
 
 			// zobrazení debug string
 			textAlign(CENTER, BOTTOM);
 			fill(255,255,255);
 			textSize(12);
-			// debugString = stateHistory.size()+":"+int(state.sposition.x)+"x"+int(state.sposition.y)+" "+state.timestamp;
 			text(debugString, state.sposition.x, state.sposition.y-state.ssize.y/2);
 			textAlign(CENTER, CENTER);
-			// // zobrazení id
+			// zobrazení id
 			fill(0, 0, 255);
 			textSize(28);
 			text(""+id, state.sposition.x, state.sposition.y);

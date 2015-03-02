@@ -22,8 +22,6 @@ class Balls {
 	void processGlobs (int[][] globs, int[] camPixels) {
 		ArrayList<State> states = new ArrayList<State>();
 
-		debugString = "";
-
 		for (Ball ball : balls) {
 			ball.updatePrediction();
 			ball.updated = false;
@@ -78,9 +76,6 @@ class Balls {
 				// optimalizovat :'(
 				probabilities = reverse(sort(probabilities));
 
-				stroke(255, 255, 255, 128);
-				text(round(probabilities[0]*100)/100.0, state.sposition.x, state.sposition.y);
-				
 				if(probabilities[0] > 0.6){
 					Ball ball = ballsProbabilities.get(probabilities[0]);
 					ball.updateBall(state);
@@ -106,7 +101,7 @@ class Balls {
 			// projde všechny míčky, ke kterým nebyl nalezen glob
 			if(!ball.updated){
 				// několik stavů si míček dopočítá
-				if(ball.predictedStates < 5){
+				if(ball.predictedStates < 2){
 					ball.predict();
 				}
 				// pokud počet dopočítaných stavů překročí hranici

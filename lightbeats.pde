@@ -39,13 +39,13 @@ int avgStateCount = 5;
 // glob detection
 // - probability weights
 float colorWeight = 0.4;
-float positionWeight = 0.6;
-float predictedPositionWeight = 0.6;
-float sizeWeight = 0.1;
+float positionWeight = 0.5;
+float predictedPositionWeight = 0.5;
+float sizeWeight = 0.2;
 // - maximal values
 float dColorMax = 255;
 float dPositionMax = pow(80, 2);
-float dPredictedPositionMax = pow(40, 2);
+float dPredictedPositionMax = pow(50, 2);
 float dSizeMax = pow(20, 2);
 
 // prediction
@@ -115,31 +115,22 @@ void draw() {
 	m.update();
 	frameTimestamp = millis();
 	
+	pushMatrix();
+
 	scale(min(width/float(camResX), height/float(camResY)));
 	background(0); //Set background black
 
 	globArray = m.globBoxes();
 
 	if(debug){
+		// Zobrazí obrázek z webkamery
 		m.imageCopy(debugView.pixels);
 		debugView.updatePixels();
 		image(debugView, 0, 0);
 
-		// draw the glob bounding boxes
-		// for(int i = 0; i < globArray.length; i++) {
-		// 	int[] boxArray = globArray[i];
-		
-		// 	noFill();
-		// 	strokeWeight(3);
-		// 	stroke(255, 0, 0);
-		// 	rect(boxArray[0], boxArray[1], boxArray[2], boxArray[3]);
-		// 	strokeWeight(1);
-		// 	noStroke();
-		// }
-
+		// Zakreslí okraje globů
 		int list[][][] = m.globPixels();
 		stroke(255, 0, 0);
-
 		for(int i=0;i<list.length;i++){
 			int[][] pixellist = list[i];
 			if(pixellist!=null){
@@ -156,15 +147,23 @@ void draw() {
 	balls.processGlobs(globArray, m.image());
 	balls.render();
 
+	fill(255,255,0);
+	textSize(16);
+	textAlign(RIGHT, BOTTOM);
+	text(int(frameTimestamp), camResX-10, camResY-10);
+
 	if(capture){
 		saveFrame("frames/####.tga");
 	}
-	if(debug){
+	// if(debug){
+		// FPS
 		fill(255,255,0);
 		textSize(16);
 		textAlign(RIGHT, TOP);
 		text(int(frameRate), camResX-10, 0);
-	}
+	// }
+
+	popMatrix();
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -202,9 +201,6 @@ void keyPressed(){
 			break;
 	case 'C':
 			capture = !capture;
-			break;
-	case 'Q':
-			stop();
 			break;
 	case 27: // ESCAPE
 			stop();
