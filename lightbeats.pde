@@ -17,7 +17,6 @@
  */
 
 import JMyron.*;
-import gab.opencv.*;
 
 //---------------------------------------------------------------
 // GLOBAL SETTINGS
@@ -38,13 +37,13 @@ int avgStateCount = 5;
 // glob detection
 // - probability weights
 float colorWeight = 0.4;
-float positionWeight = 0.4;
-float predictedPositionWeight = 0.0;
-float sizeWeight = 0.3;
+float positionWeight = 0.6;
+float predictedPositionWeight = 0.6;
+float sizeWeight = 0.1;
 // - maximal values
 float dColorMax = 255;
-float dPositionMax = pow(100, 2);
-float dPredictedPositionMax = pow(100, 2);
+float dPositionMax = pow(80, 2);
+float dPredictedPositionMax = pow(40, 2);
 float dSizeMax = pow(20, 2);
 
 // prediction
@@ -68,12 +67,13 @@ int find (float needle, float[] haystack) {
 }
 
 JMyron m;
-OpenCV opencv;
 int[][] globArray;
+int[][][] globPixels;
 
 int program = -3; //controlling speed along x axis, on start stay static until UP or DOWN arrow keys are pressed; 
 
 boolean capture = false;
+int frameTimestamp;
 
 PImage debugView;
 
@@ -85,23 +85,18 @@ Balls balls;
 //SETUP
 
 void setup() {
-	size(displayWidth, displayHeight);
+	size(camResX, camResY);
+	// size(displayWidth, displayHeight);
 	
 	m = new JMyron();
 	m.start(camResX, camResY);
 	m.findGlobs(1);
-	// m.trackColor(0, 44, 222, 255); //track the brightest
-	// m.adaptivity(2);
 	m.trackNotColor(0,0,0,255);
-	m.minDensity(250);
+	m.minDensity(150);
 	m.maxDensity(1000);
 	m.sensitivity(threshold);
 
-	opencv = new OpenCV(this, camResX, camResY);
 
-	ellipseMode(CENTER); //we draw ellipse from center
-	noStroke();
-	
 	debugView = createImage(camResX, camResY, ARGB);
 
 	balls = new Balls();
@@ -111,41 +106,19 @@ void setup() {
 //DRAW
 
 void draw() {
-	// scale(displayWidth/camResX, displayHeight/camResY);
-	scale(min(displayWidth/float(camResX), displayHeight/float(camResY)));
+	scale(min(width/float(camResX), height/float(camResY)));
 	background(0); //Set background black
 	m.update();
-	
-	if(debug){
-		m.imageCopy(debugView.pixels);
-		debugView.updatePixels();
-		image(debugView, 0, 0);
-	}
-	// opencv.loadImage(debugView);
-	// opencv.findCannyEdges(20, 75);
-	// ArrayList<Line> lines = opencv.findLines(100, 30, 20);
-
-	// image(opencv.getOutput(), 0, 0);
-
-	// strokeWeight(3);
-	// for (Line line : lines) {
-	// 	// lines include angle in radians, measured in double precision
-	// 	// so we can select out vertical and horizontal lines
-	// 	// They also include "start" and "end" PVectors with the position
-	// 	if (line.angle >= radians(0) && line.angle < radians(1)) {
-	// 		stroke(0, 255, 0);
-	// 		line(line.start.x, line.start.y, line.end.x, line.end.y);
-	// 	}
-
-	// 	if (line.angle > radians(89) && line.angle < radians(91)) {
-	// 		stroke(255, 0, 0);
-	// 		line(line.start.x, line.start.y, line.end.x, line.end.y);
-	// 	}
-	// }
+	frameTimestamp = millis();
 
 	globArray = m.globBoxes();
 
 	if(debug){
+		m.imageCopy(debugView.pixels);
+		debugView.updatePixels();
+		image(debugView, 0, 0);
+
+
 		// draw the glob bounding boxes
 		// for(int i = 0; i < globArray.length; i++) {
 		// 	int[] boxArray = globArray[i];
@@ -158,22 +131,20 @@ void draw() {
 		// 	noStroke();
 		// }
 
-		// int list[][][] = m.globPixels();
-		// stroke(255, 0, 0);
+		int list[][][] = m.globPixels();
+		stroke(255, 0, 0);
 
-		// for(int i=0;i<list.length;i++){
-		// int[][] pixellist = list[i];
-		// if(pixellist!=null){
-		//   // beginShape(POINTS);
-		//   for(int j=0;j<pixellist.length;j++){
-		//   	if(j % 10 == 0)
-		//     	point( pixellist[j][0]  ,  pixellist[j][1] );
-		//     // vertex( pixellist[j][0]  ,  pixellist[j][1] );
-		//    // print( pixellist[j][0]  +" " +  pixellist[j][1] );
-		//   }
-		//   // endShape();
-		//  }
-		// }
+		for(int i=0;i<list.length;i++){
+			int[][] pixellist = list[i];
+			if(pixellist!=null){
+				beginShape(POINTS);
+				for(int j=0;j<pixellist.length;j++){
+					if(j % 2 == 0)
+						vertex( pixellist[j][0]  ,  pixellist[j][1] );
+				}
+				endShape();
+			}
+		}
 		//draw edge points (same as last, but vector based)
 		// int list[][][] = m.globEdgePoints(20);
 		// stroke(255, 0, 0);
@@ -190,9 +161,14 @@ void draw() {
 	balls.processGlobs(globArray, m.image());
 	balls.render();
 
-	if(capture && frameCount % 10 == 0){
-		saveFrame();
+	if(capture){
+		saveFrame("frames/####.tga");
 	}
+
+	fill(255,255,0);
+	textSize(16);
+	textAlign(RIGHT, TOP);
+	text(int(frameRate), camResX-10, 0);
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------

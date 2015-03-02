@@ -5,9 +5,9 @@ class Ball {
 	// počet zaznamenaných stavů
 	int historyLength = ballStateCount;
 	// jak moc jsme si jistí, že míček stále existuje?
-	float probability = 1;
 	// jak moc jsme si jistí, že je toto opravdu míček?
 	float ballProbability = 0.5;
+	int predictedStates = 0;
 	boolean updated;
 
 	int id;
@@ -45,8 +45,14 @@ class Ball {
 
 	// přidá vypočítaný stav
 	void predict () {
-		probability *= 0.5;
+		predictedStates++;
 		addState(new State(predictedState));
+	}
+
+	void updateBall (State state) {
+		updated = true;
+		predictedStates = 0;
+		addState(state);
 	}
 
 	void removeOldestState(){
@@ -73,7 +79,7 @@ class Ball {
 		if(stateHistory.size() >= 1){
 			State state1 = getState(0); // poslední
 			predictedState.scolor = state1.scolor;
-			if(stateHistory.size() >= 3){
+			if(stateHistory.size() >= 2){
 				State state2 = getState(1); // předposlední
 
 				// predictedState.ssize.set(state1.ssize);
@@ -81,7 +87,7 @@ class Ball {
 				// predictedState.ssize.div(2);
 				predictedState.ssize = avgState.ssize.get();
 
-				if(stateHistory.size() >= 3 && false){ // fix
+				if(stateHistory.size() >= 3){ // fix
 					State state3 = getState(2); // předpředposlední
 
 					// korekce se týká připadu, kdy míček mizí za překážkou a zmenšuje se mu velikost
@@ -90,7 +96,7 @@ class Ball {
 					PVector state2CorrectedPosition;
 					PVector state3CorrectedPosition;
 
-					if(PVector.sub(state1.sposition, state2.sposition).dot(new PVector(1, 1)) > 0){
+					if(PVector.sub(state1.sposition, state2.sposition).dot(new PVector(1.0, 1.0)) > 0){
 						state1CorrectedPosition = PVector.sub(avgState.ssize, state1.ssize);
 						state2CorrectedPosition = PVector.sub(avgState.ssize, state2.ssize);
 						state3CorrectedPosition = PVector.sub(avgState.ssize, state3.ssize);
@@ -101,64 +107,63 @@ class Ball {
 						state3CorrectedPosition = PVector.sub(state3.ssize, avgState.ssize);
 					}
 
-					state1CorrectedPosition.mult(0.5 * correctionWeight);
-					state2CorrectedPosition.mult(0.5 * correctionWeight);
-					state3CorrectedPosition.mult(0.5 * correctionWeight);
+					state1CorrectedPosition.mult(0.5);
+					state2CorrectedPosition.mult(0.5);
+					state3CorrectedPosition.mult(0.5);
 					state1CorrectedPosition.add(state1.sposition);
 					state2CorrectedPosition.add(state2.sposition);
 					state3CorrectedPosition.add(state3.sposition);
 
 					// v_p = 3v_1 - 3v_2 + v_3;
-					predictedState.sposition.set(state1CorrectedPosition);
-					predictedState.sposition.mult(3);
-					predictedState.sposition.sub(PVector.mult(state2CorrectedPosition, 3));
-					predictedState.sposition.add(state3CorrectedPosition);
 
-					// predictedState.sposition.set(state1.sposition);
-					// predictedState.sposition.mult(3);
-					// predictedState.sposition.sub(PVector.mult(state2.sposition, 3));
-					// predictedState.sposition.add(state3.sposition);
+					float t1 = state1.timestamp-state2.timestamp;
+					float t2 = state2.timestamp-state3.timestamp;
 
-					// State state3 = getState(2); // předpředposlední
-					// State state4 = getState(3);
+					// PVector v1 = PVector.sub(state1CorrectedPosition, state2CorrectedPosition);
+					PVector v1 = PVector.sub(state1.sposition, state2.sposition);
+					v1.div(t1);
+					// PVector v2 = PVector.sub(state2CorrectedPosition, state3CorrectedPosition);
+					PVector v2 = PVector.sub(state2.sposition, state3.sposition);
+					v2.div(t2);
 
-					// predictedState.sposition.set(state1.sposition);
-					// predictedState.sposition.sub(state2.sposition);
-					// predictedState.sposition.sub(state3.sposition);
-					// predictedState.sposition.add(state4.sposition);
-
-					// predictedState.sposition.add(PVector.mult(state1.sposition, 2));
-					// predictedState.sposition.sub(state2.sposition);
+					predictedState.sposition.set(v1);
+					predictedState.sposition.mult(t1+t2);
+					predictedState.sposition.sub( PVector.div(PVector.mult(v2, t1+t2), 2.0) );
+					// predictedState.sposition.add(state1CorrectedPosition);
+					predictedState.sposition.add(state1.sposition);
 
 				}
 				else {
 					// korekce se týká připadu, kdy míček mizí za překážkou a zmenšuje se mu velikost
 					// při zmenšující se velikosti se totiž přesouvá i střed, který pak nekoresponduje s reálným
-					PVector state1CorrectedPosition;
-					PVector state2CorrectedPosition;
+					// PVector state1CorrectedPosition;
+					// PVector state2CorrectedPosition;
 
-					if(PVector.sub(state1.sposition, state2.sposition).dot(new PVector(1, 1)) > 0){
-						state1CorrectedPosition = PVector.sub(avgState.ssize, state1.ssize);
-						state2CorrectedPosition = PVector.sub(avgState.ssize, state2.ssize);
-					}
-					else {
-						state1CorrectedPosition = PVector.sub(state1.ssize, avgState.ssize);
-						state2CorrectedPosition = PVector.sub(state2.ssize, avgState.ssize);
-					}
+					// if(PVector.sub(state1.sposition, state2.sposition).dot(new PVector(1, 1)) > 0){
+					// 	state1CorrectedPosition = PVector.sub(avgState.ssize, state1.ssize);
+					// 	state2CorrectedPosition = PVector.sub(avgState.ssize, state2.ssize);
+					// }
+					// else {
+					// 	state1CorrectedPosition = PVector.sub(state1.ssize, avgState.ssize);
+					// 	state2CorrectedPosition = PVector.sub(state2.ssize, avgState.ssize);
+					// }
 
-					state1CorrectedPosition.mult(0.5 * correctionWeight);
-					state2CorrectedPosition.mult(0.5 * correctionWeight);
-					state1CorrectedPosition.add(state1.sposition);
-					state2CorrectedPosition.add(state2.sposition);
+					// state1CorrectedPosition.mult(0.5 * correctionWeight);
+					// state2CorrectedPosition.mult(0.5 * correctionWeight);
+					// state1CorrectedPosition.add(state1.sposition);
+					// state2CorrectedPosition.add(state2.sposition);
 
-					// v_p = 2v_1 - v_2;
-					predictedState.sposition.set(state1CorrectedPosition);
-					predictedState.sposition.mult(2);
-					predictedState.sposition.sub(state2CorrectedPosition);
-
-					// predictedState.sposition.set(state1.sposition);
+					// // v_p = 2v_1 - v_2;
+					// predictedState.sposition.set(state1CorrectedPosition);
 					// predictedState.sposition.mult(2);
-					// predictedState.sposition.sub(state2.sposition);
+					// predictedState.sposition.sub(state2CorrectedPosition);
+
+					float t0 = frameTimestamp - state1.timestamp;
+					float t1 = state1.timestamp - state2.timestamp;
+					predictedState.sposition.set(state1.sposition);
+					predictedState.sposition.sub(state2.sposition);
+					predictedState.sposition.mult(t0/t1);
+					predictedState.sposition.add(state1.sposition);
 				}
 
 			}
@@ -221,7 +226,7 @@ class Ball {
 	}
 
 	void update () {
-		updatePrediction();
+		// updatePrediction();
 		updateAverages();
 
 		updateProbability();
@@ -256,7 +261,7 @@ class Ball {
 		// debugString = ""+round((dColorPerc + dPositionPerc + dPredictedPositionPerc + dSizePerc)*100.0)/100.0;
 		debugString = round((dColorPerc)*100.0)/100.0 + ";" +round((dPositionPerc)*100.0)/100.0 + ";" +round((dPredictedPositionPerc)*100.0)/100.0 + ";" +round((dSizePerc)*100.0)/100.0;
 
-		return dColorPerc + dPositionPerc + dPredictedPositionPerc + dSizePerc;
+		return dColorPerc + max(dPositionPerc, dPredictedPositionPerc) + dSizePerc;
 	}
 
 	void render(){
@@ -284,6 +289,7 @@ class Ball {
 			textAlign(CENTER, BOTTOM);
 			fill(255,255,255);
 			textSize(12);
+			// debugString = stateHistory.size()+":"+int(state.sposition.x)+"x"+int(state.sposition.y)+" "+state.timestamp;
 			text(debugString, state.sposition.x, state.sposition.y-state.ssize.y/2);
 			textAlign(CENTER, CENTER);
 			// // zobrazení id
