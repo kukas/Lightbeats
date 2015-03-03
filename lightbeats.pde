@@ -60,14 +60,6 @@ boolean sketchFullScreen() {
 	return true;
 }
 
-int find (float needle, float[] haystack) {
-	for (int i = 0; i < haystack.length; i++) {
-		if(haystack[i] == needle)
-			return i;
-	}
-	return -1;
-}
-
 JMyron m;
 int[][] globArray;
 int[][][] globPixels;
@@ -187,29 +179,29 @@ void draw() {
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //User input - calibrating camera and animation
 	
-void cameraSettings(){
+void cameraSettings() {
 	m.settings();//click the window to get the settings of camera
 }
 
-void brightnessThreshold(float t){
+void brightnessThreshold(float t) {
 	threshold = t;
 	m.sensitivity(threshold);
 }
 
 //by pressing arrow key up and down you animate movement of previous frames along x axis 
 //(originally designed to flow in the left direction-UP arrow key or stay static - program value is 0)
-void keyPressed(){
+void keyPressed() {
 	switch(keyCode) {
-	case ' ': 
+		case ' ': 
 			saveFrame("diagram-####.jpg"); //tga is the fastest..but you can specify jpg,png...
 			break;
-	case 'A':
+		case 'A':
 			// m.adapt();
 			color c = m.average(0, 0, camResX, camResY);
 			m.trackNotColor(int(red(c)), int(green(c)), int(blue(c)), 255);
 			balls.adapt();
 			break;
-	case 'D':
+		case 'D':
 			debug = !debug;
 			if(debug)
 				cp5.show();
@@ -217,13 +209,12 @@ void keyPressed(){
 				cp5.hide();
 
 			break;
-	case 'C':
+		case 'C':
 			capture = !capture;
 			break;
-	case 27: // ESCAPE
+		case 27: // ESCAPE
 			stop();
 			break;
-
 	}
 }
 //-----------------------------------------------------------------------------------------------------------

@@ -3,16 +3,16 @@ class Renderer {
 
 	Animation duck;
 
-	Renderer (Balls balls) {
+	Renderer(Balls balls) {
 		this.balls = balls;
 	}
 
-	void init () {
+	void init() {
 		duck = new Animation("duck/framespsd", 24, 80);
 	}
 
 	// ŠNECI! - skoro jako na videu
-	void rendersneci () {
+	void rendersneci() {
 		pushMatrix();
 		
 		noStroke();
@@ -38,7 +38,7 @@ class Renderer {
 		popMatrix();
 	}
 
-	void render () {
+	void render() {
 		pushMatrix();
 
 		scale(min(width/float(camResX), height/float(camResY)));

@@ -7,7 +7,7 @@ class State {
 	int globId;
 	boolean predicted = false;
 
-	State () {
+	State() {
 		this.scolor = color(0, 0, 0);
 		this.sposition = new PVector();
 		this.ssize = new PVector();
@@ -15,7 +15,7 @@ class State {
 		timestamp = frameTimestamp;
 	}
 
-	State (color c, PVector p, PVector s) {
+	State(color c, PVector p, PVector s) {
 		this.scolor = c;
 		this.sposition = p;
 		this.ssize = s;
@@ -23,7 +23,7 @@ class State {
 		timestamp = frameTimestamp;
 	}
 
-	State (State s) {
+	State(State s) {
 		this.scolor = s.scolor;
 		this.sposition = s.sposition.get();
 		this.ssize = s.ssize.get();

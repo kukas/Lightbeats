@@ -4,12 +4,8 @@ class Balls {
 
 	String debugString = "";
 
-	Finder finder;
-
-	Balls () {
+	Balls() {
 		balls = new ArrayList<Ball>();
-
-		finder = new Finder();
 	}
 
 	void adapt() {
@@ -19,10 +15,11 @@ class Balls {
 	}
 
 	// projde globy a přiřadí je k míčkům / vytvoří nové míčky
-	void processGlobs (int[][] globs, int[] camPixels) {
+	void processGlobs(int[][] globs, int[] camPixels) {
 		ArrayList<State> states = new ArrayList<State>();
 
 		for (Ball ball : balls) {
+			// predikce se updatuje zde, protože teprve teď známe timestamp nového snímku
 			ball.updatePrediction();
 			ball.updated = false;
 		}
@@ -56,13 +53,13 @@ class Balls {
 		// přidá jednoduché případy
 			// a) nové míčky
 			// b) stávající míčky, kterým program připsal velikou pravděpodobnost
-			// c) hraniční případy, kdy více míčků u sebe splyne v jeden glob
 		for (int i=states.size()-1; i>=0; i--) {
 			State state = states.get(i);
 
 			if(balls.size() > 0){
 				int ballCount = balls.size();
 
+				// vytvoří pole pravděpodobností pro každý známý míček
 				float[] probabilities = new float[ballCount];
 				HashMap<Float, Ball> ballsProbabilities = new HashMap<Float, Ball>(ballCount);
 
@@ -73,27 +70,33 @@ class Balls {
 					ballsProbabilities.put(probabilities[j], balls.get(j));
 				}
 
-				// optimalizovat :'(
+				// optimalizovat :'( (EDIT: neni to tak hrozný :D )
 				probabilities = reverse(sort(probabilities));
 
+				// známý míček
 				if(probabilities[0] > 0.6){
 					Ball ball = ballsProbabilities.get(probabilities[0]);
 					ball.updateBall(state);
 					states.remove(state);
 					continue;
 				}
+				// nový míček!
 				if(probabilities[0] < 0.3){
 					addBall(state);
 					states.remove(state);
 					continue;
 				}
+
+				// ostatní případy jsou sporné a chce se mi z nich plakat
 			}
 			else {
-				// pokud netrackujeme žádné míčky, vytvoří ze všech globů
+				// pokud netrackujeme žádné míčky, vytvoří nové ze všech globů
 				addBall(state);
 				states.remove(state);
 			}
 		}
+
+		// ve states jsou teď sporné míčky, můžeme je leda oplakávat
 
 		for (int i = balls.size()-1; i >= 0; i--) {
 			Ball ball = balls.get(i);
@@ -101,7 +104,7 @@ class Balls {
 			// projde všechny míčky, ke kterým nebyl nalezen glob
 			if(!ball.updated){
 				// několik stavů si míček dopočítá
-				if(ball.predictedStates < 2){
+				if(ball.predictedStates < 3){
 					ball.predict();
 				}
 				// pokud počet dopočítaných stavů překročí hranici
@@ -117,11 +120,11 @@ class Balls {
 		}
 	}
 
-	void addBall (State state) {
+	void addBall(State state) {
 		balls.add(new Ball(state));
 	}
 
-	void render(){
+	void render() {
 		for (Ball ball : balls) {
 			ball.render();
 		}
