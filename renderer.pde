@@ -96,9 +96,11 @@ class Renderer {
 			for (int j = i+1; j < balls.balls.size(); j++	) {
 				Ball b1 = balls.balls.get(i);
 				Ball b2 = balls.balls.get(j);
-				State s1 = b1.avgState;
-				State s2 = b2.avgState;
-				line(s1.sposition.x, s1.sposition.y, s2.sposition.x, s2.sposition.y);
+				if(b1.ballProbability == 1 && b2.ballProbability == 1){
+					State s1 = b1.avgState;
+					State s2 = b2.avgState;
+					line(s1.sposition.x, s1.sposition.y, s2.sposition.x, s2.sposition.y);
+				}
 			}
 		}
 
