@@ -160,9 +160,9 @@ void draw() {
 	}
 	popMatrix();
 
-	// if(!debug){
+	if(!debug){
 		renderer.render();
-	// }
+	}
 
 	if(debug) {
 		fill(255,255,0);
@@ -174,13 +174,13 @@ void draw() {
 	if(capture){
 		saveFrame("frames/####.tga");
 	}
-	// if(debug){
+	if(debug){
 		// FPS
 		fill(255,255,0);
 		textSize(16);
 		textAlign(RIGHT, TOP);
 		text(int(frameRate), width-10, 0);
-	// }
+	}
 
 }
 
