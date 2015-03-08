@@ -34,31 +34,25 @@ boolean capture = false;
 
 // view
 int ballStateCount = 10;
-int avgStateCount = 5;
+int avgStateCount = 7;
 
 // glob detection
 // - probability weights
-float colorWeight = 0.4;
+float colorWeight = 0.3;
 float positionWeight = 0.5;
 float predictedPositionWeight = 0.5;
-float sizeWeight = 0.2;
+float sizeWeight = 0.3;
 // - maximal values
 float dColorMax = 8;
-float dPositionMax = pow(16, 2);
+float dPositionMax = pow(13, 2);
 float dPredictedPositionMax = pow(10, 2);
-float dSizeMax = pow(4, 2);
+float dSizeMax = pow(5, 2);
 
 // prediction
 float correctionWeight = 0.5;
 
 // ball detection
 float ballProbabilityThreshold = 0.5; // po jaké hodnotě se glob považuje za míček
-
-
-// zapne fullscreen
-boolean sketchFullScreen() {
-	return true;
-}
 
 JMyron m;
 int[][] globArray;
@@ -80,7 +74,7 @@ Renderer renderer;
 //-----------------------------------------------------------------------------------------------------------
 //SETUP
 
-void setup() {
+void setup_lightbeats() {
 	// size(camResX, camResY);
 	size(displayWidth, displayHeight);
 	
@@ -88,9 +82,11 @@ void setup() {
 	m.start(camResX, camResY);
 	m.findGlobs(1);
 	m.trackNotColor(0,0,0,255);
-	m.minDensity(150);
+	m.minDensity(50);
 	m.maxDensity(1000);
 	m.sensitivity(threshold);
+
+	frameRate(-1);
 
 	debugView = createImage(camResX, camResY, ARGB);
 
@@ -110,7 +106,7 @@ void setup() {
 //-----------------------------------------------------------------------------------------------------------
 //DRAW
 
-void draw() {
+void draw_lightbeats() {
 	m.update();
 	int now = millis();
 	deltaTime = now - frameTimestamp;
@@ -122,7 +118,7 @@ void draw() {
 	background(0); //Set background black
 
 	globArray = m.globBoxes();
-
+	int globPixels[][][] = m.globEdgePoints(1);
 	if(debug){
 		// Zobrazí obrázek z webkamery
 		m.imageCopy(debugView.pixels);
@@ -131,7 +127,7 @@ void draw() {
 
 		// Zakreslí okraje globů
 		// int globPixels[][][] = m.globPixels();
-		int globPixels[][][] = m.globEdgePoints(1);
+		
 		noFill();
 		for(int i=0;i<globArray.length;i++){
 			int[][] boundary = globPixels[i];
@@ -161,26 +157,26 @@ void draw() {
 
 			rect(globBox[0], globBox[1], globBox[2], globBox[3]);
 
-			ArrayList<State> circles = balls.finder.findCircles(boundary, globBox);
-			strokeWeight(3);
-			for (int j=0; j<circles.size(); j++) {
-				State circle = circles.get(j);
-				stroke(j*255, 255, 0, 128);
-				ellipse(circle.sposition.x, circle.sposition.y, circle.ssize.x, circle.ssize.y);
-			}
+			// ArrayList<State> circles = balls.finder.findCircles(boundary, globBox);
+			// strokeWeight(3);
+			// for (int j=0; j<circles.size(); j++) {
+			// 	State circle = circles.get(j);
+			// 	stroke(j*255, 255, 0, 128);
+			// 	ellipse(circle.sposition.x, circle.sposition.y, circle.ssize.x, circle.ssize.y);
+			// }
 		}
 	}
 
-	// balls.processGlobs(globArray, m.image());
+	balls.processGlobs(globArray, globPixels);
 
-	// if(debug){
-	// 	balls.render();
-	// }
+	if(debug){
+		balls.render();
+	}
 	popMatrix();
 
-	// if(!debug){
-	// 	renderer.render();
-	// }
+	if(!debug){
+		renderer.render();
+	}
 
 	if(debug) {
 		fill(255,255,0);
@@ -216,7 +212,7 @@ void brightnessThreshold(float t) {
 
 //by pressing arrow key up and down you animate movement of previous frames along x axis 
 //(originally designed to flow in the left direction-UP arrow key or stay static - program value is 0)
-void keyPressed() {
+void keyPressed_lightbeats() {
 	switch(keyCode) {
 		case ' ': 
 			saveFrame("diagram-####.jpg"); //tga is the fastest..but you can specify jpg,png...

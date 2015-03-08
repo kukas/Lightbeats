@@ -19,7 +19,7 @@ class Balls {
 	}
 
 	// projde globy a přiřadí je k míčkům / vytvoří nové míčky
-	void processGlobs(int[][] globs, int[] camPixels) {
+	void processGlobs(int[][] globs, int[][][] globPixels) {
 		ArrayList<State> states = new ArrayList<State>();
 
 		for (Ball ball : balls) {
@@ -76,6 +76,83 @@ class Balls {
 
 				// optimalizovat :'( (EDIT: neni to tak hrozný :D )
 				probabilities = reverse(sort(probabilities));
+
+				int circleCount = 0;
+				for (float probability : probabilities) {
+					if(probability > 0.6 && circleCount < 2){
+						circleCount++;
+					}
+					else {
+						break;
+					}
+				}
+
+				fill(255,255,255);
+				textSize(30);
+				textAlign(LEFT, TOP);
+				text(""+circleCount, state.sposition.x, state.sposition.y);
+				textSize(12);
+
+				// if(circleCount > 0 && state.globId != null){
+				if(circleCount > 0){
+					int[][] boundary = globPixels[state.globId];
+					ArrayList<State> circles = finder.findCircles(boundary, state, circleCount);
+					// strokeWeight(3);
+					// noFill();
+					// for (int j=0; j<circles.size(); j++) {
+					// 	State circle = circles.get(j);
+					// 	stroke(j*255, 255, 0, 128);
+					// 	ellipse(circle.sposition.x, circle.sposition.y, circle.ssize.x, circle.ssize.y);
+					// }
+					// strokeWeight(1);
+
+					if(circles.size() == 1){
+						Ball bestBall = ballsProbabilities.get(probabilities[0]);
+						float newProbability = bestBall.getProbability(circles.get(0));
+						if(newProbability > probabilities[0]){
+							// odstraní původní, protože máme lepší
+							states.remove(state);
+
+							state = circles.get(0);
+							ballsProbabilities.put(newProbability, bestBall);
+							probabilities[0] = newProbability;
+						}
+					}
+					if(circles.size() == 2){
+						// states.remove(state);
+						// states.addAll(circles);
+						// i += 2;
+						// continue;
+
+						Ball bestBall = ballsProbabilities.get(probabilities[0]);
+						float newProbability1 = bestBall.getProbability(circles.get(0));
+						float newProbability2 = bestBall.getProbability(circles.get(1));
+						if(newProbability1 > newProbability2 && newProbability1 > probabilities[0]){
+							states.remove(state);
+
+							state = circles.get(0);
+							ballsProbabilities.put(newProbability1, bestBall);
+							probabilities[0] = newProbability1;
+							fill(255,0,0);
+							text(""+newProbability1, 0, 0);
+							fill(0,255,0);
+							text(""+newProbability2, 0, 0);
+							
+							// states.add(circles.get(1));
+							// i++;
+						}
+						if(newProbability2 > newProbability1 && newProbability2 > probabilities[0]){
+							states.remove(state);
+
+							state = circles.get(1);
+							ballsProbabilities.put(newProbability2, bestBall);
+							probabilities[0] = newProbability2;
+
+							// states.add(circles.get(0));
+							// i++;
+						}
+					}
+				}
 
 				// známý míček
 				if(probabilities[0] > 0.6){

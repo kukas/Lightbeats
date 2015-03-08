@@ -6,15 +6,15 @@ class Finder {
 		
 	}
 
-	ArrayList<State> findCircles(int[][] boundary, int[] boundingBox) {
+	ArrayList<State> findCircles(int[][] boundary, State boundingState, int circleCount) {
 		int pointCount = boundary.length;
 		int totalPointCount = pointCount;
 		if(pointCount < 3)
 			return new ArrayList<State>();
 
-		int size = max(boundingBox[2], boundingBox[3]);
-		int xbox = boundingBox[0] + (boundingBox[2]-size)/2;
-		int ybox = boundingBox[1] + (boundingBox[3]-size)/2;
+		int size = (int) max(boundingState.ssize.x, boundingState.ssize.y);
+		int xbox = (int) (boundingState.sposition.x - boundingState.ssize.x/2.0);
+		int ybox = (int) (boundingState.sposition.y - boundingState.ssize.y/2.0);
 
 		if(size > 200)
 			return new ArrayList<State>();
@@ -22,7 +22,7 @@ class Finder {
 		ArrayList<State> circles = new ArrayList<State>();
 
 		float lastCircleProbability = 0.2;
-		int maxCircles = 2;
+		int maxCircles = circleCount;
 		while(maxCircles-- > 0){
 			int[][] histogram = new int[size][size];
 
@@ -64,7 +64,7 @@ class Finder {
 
 				int cx = (d1*y32 + d2*y13 + d3*y21)/delitelx - xbox;
 				int cy = (d1*x32 + d2*x13 + d3*x21)/delitely - ybox;
-
+				// println(cx, cy);
 				if(cx > 0 && cx < size && cy > 0 && cy < size){
 					histogram[cx][cy]++;
 					votes++;
@@ -100,6 +100,9 @@ class Finder {
 				}
 			}
 
+			if(maxRadiusValue <= 0)
+				break;
+
 			int avgRadius = 0;
 			int sumRadius = 0;
 			for (int i = 0; i < size; i++) {
@@ -126,12 +129,31 @@ class Finder {
 				}
 			}
 
+			// println(maxValue);
+			// if(maxValue > 1){
+			// 	strokeWeight(1);
+			// 	// fill(0,0,0,200);
+			// 	noFill();
+			// 	stroke(255, 255, 255);
+			// 	rect(xbox, ybox, size, size);
+
+			// 	for (int x = 0; x < size; x++) {
+			// 		for (int y = 0; y < size; y++) {
+			// 			if(histogram[x][y] > 0){
+			// 				stroke(histogram[x][y]/float(maxValue)*255.0, 255);
+			// 				point(x+xbox, y+ybox);
+			// 			}
+			// 		}
+			// 	}
+			// }
+
+
 			float circleProbability = maxValue*maxRadiusValue/float(votes) * (pointCount - newPointCount)/pointCount;
 
 			if(lastCircleProbability/circleProbability < 1.5){
-				fill(0, 255, 0, 200);
-				text(""+circleProbability, maxCoords[0], maxCoords[1]);
-				noFill();
+				// fill(0, 255, 0, 200);
+				// text(""+circleProbability, maxCoords[0], maxCoords[1]);
+				// noFill();
 
 				color globColor = m.average(maxCoords[0]-avgRadius, maxCoords[1]-avgRadius, maxCoords[0]+avgRadius, maxCoords[1]+avgRadius);
 				PVector globPosition = new PVector(maxCoords[0], maxCoords[1]);
@@ -141,9 +163,9 @@ class Finder {
 				circles.add(state);
 			}
 			else {
-				fill(255, 0, 0, 200);
-				text(""+circleProbability, maxCoords[0], maxCoords[1]);
-				noFill();
+				// fill(255, 0, 0, 200);
+				// text(""+circleProbability, maxCoords[0], maxCoords[1]);
+				// noFill();
 
 				break;
 			}
@@ -174,23 +196,6 @@ class Finder {
 				endShape();
 			}
 		}
-
-		// println(maxValue);
-		// if(maxValue > 1){
-		// 	strokeWeight(1);
-		// 	// fill(0,0,0,200);
-		// 	stroke(255, 255, 255);
-		// 	rect(xbox, ybox, size, size);
-
-		// 	for (int x = 0; x < size; x++) {
-		// 		for (int y = 0; y < size; y++) {
-		// 			if(histogram[x][y] > 0){
-		// 				stroke(histogram[x][y]/float(maxValue)*255.0, 255);
-		// 				point(x+xbox, y+ybox);
-		// 			}
-		// 		}
-		// 	}
-		// }
 
 		if(circles.size() == 2){
 			State c1 = circles.get(0);

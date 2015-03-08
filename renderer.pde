@@ -85,24 +85,24 @@ class Renderer {
 				// KACHNY!!!! (vypadaj suprově)
 				State state = ball.getState();
 				float r = sqrt(state.ssize.x*state.ssize.x + state.ssize.y*state.ssize.y);
-				duck.display(frameTimestamp-ball.timestamp, state.sposition.x, state.sposition.y, r, r);
+				duck.display(frameTimestamp-ball.timestamp, state.sposition.x, state.sposition.y, 3*r, 3*r);
 			}
 		}
 
-		noFill();
-		stroke(255, 255, 255, 128);
-		strokeWeight(3);
-		for (int i = 0; i < balls.balls.size()-1; i++) {
-			for (int j = i+1; j < balls.balls.size(); j++	) {
-				Ball b1 = balls.balls.get(i);
-				Ball b2 = balls.balls.get(j);
-				if(b1.ballProbability == 1 && b2.ballProbability == 1){
-					State s1 = b1.avgState;
-					State s2 = b2.avgState;
-					line(s1.sposition.x, s1.sposition.y, s2.sposition.x, s2.sposition.y);
-				}
-			}
-		}
+		// noFill();
+		// stroke(255, 255, 255, 128);
+		// strokeWeight(3);
+		// for (int i = 0; i < balls.balls.size()-1; i++) {
+		// 	for (int j = i+1; j < balls.balls.size(); j++	) {
+		// 		Ball b1 = balls.balls.get(i);
+		// 		Ball b2 = balls.balls.get(j);
+		// 		if(b1.ballProbability == 1 && b2.ballProbability == 1){
+		// 			State s1 = b1.avgState;
+		// 			State s2 = b2.avgState;
+		// 			line(s1.sposition.x, s1.sposition.y, s2.sposition.x, s2.sposition.y);
+		// 		}
+		// 	}
+		// }
 
 		popMatrix();
 	}
