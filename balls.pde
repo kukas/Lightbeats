@@ -4,8 +4,12 @@ class Balls {
 
 	String debugString = "";
 
+	Finder finder;
+
 	Balls() {
 		balls = new ArrayList<Ball>();
+
+		finder = new Finder();
 	}
 
 	void adapt() {

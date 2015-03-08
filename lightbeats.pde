@@ -118,7 +118,7 @@ void draw() {
 	
 	pushMatrix();
 
-	scale(min(width/float(camResX), height/float(camResY)));
+	// scale(min(width/float(camResX), height/float(camResY)));
 	background(0); //Set background black
 
 	globArray = m.globBoxes();
@@ -130,31 +130,57 @@ void draw() {
 		image(debugView, 0, 0);
 
 		// Zakreslí okraje globů
-		int list[][][] = m.globPixels();
-		stroke(255, 0, 0);
-		for(int i=0;i<list.length;i++){
-			int[][] pixellist = list[i];
-			if(pixellist!=null){
+		// int globPixels[][][] = m.globPixels();
+		int globPixels[][][] = m.globEdgePoints(1);
+		noFill();
+		for(int i=0;i<globArray.length;i++){
+			int[][] boundary = globPixels[i];
+			int[] globBox = globArray[i];
+
+			boolean inside = false;
+			for (int j = i-1; j >= 0; j--) { // zneužívá se tady toho, že pokud glob bude v jiném globu, ten glob je před ním
+				int[] glob2 = globArray[j];
+				if(glob2[0] < globBox[0] && glob2[1] < globBox[1] && glob2[0]+glob2[2] > globBox[0]+globBox[2] && glob2[1]+glob2[3] > globBox[1]+globBox[3]){
+					inside = true;
+					break;
+				}
+			}
+			if(inside){
+				continue;
+			}
+
+			stroke(255, 0, 0, 80);
+			strokeWeight(1);
+			if(boundary!=null){
 				beginShape(POINTS);
-				for(int j=0;j<pixellist.length;j++){
-					if(j % 2 == 0)
-						vertex( pixellist[j][0]  ,  pixellist[j][1] );
+				for(int j=0;j<boundary.length;j++){
+					vertex(boundary[j][0], boundary[j][1]);
 				}
 				endShape();
+			}
+
+			rect(globBox[0], globBox[1], globBox[2], globBox[3]);
+
+			ArrayList<State> circles = balls.finder.findCircles(boundary, globBox);
+			strokeWeight(3);
+			for (int j=0; j<circles.size(); j++) {
+				State circle = circles.get(j);
+				stroke(j*255, 255, 0, 128);
+				ellipse(circle.sposition.x, circle.sposition.y, circle.ssize.x, circle.ssize.y);
 			}
 		}
 	}
 
-	balls.processGlobs(globArray, m.image());
+	// balls.processGlobs(globArray, m.image());
 
-	if(debug){
-		balls.render();
-	}
+	// if(debug){
+	// 	balls.render();
+	// }
 	popMatrix();
 
-	if(!debug){
-		renderer.render();
-	}
+	// if(!debug){
+	// 	renderer.render();
+	// }
 
 	if(debug) {
 		fill(255,255,0);
