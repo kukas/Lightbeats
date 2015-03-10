@@ -41,7 +41,7 @@ class Ball {
 
 		// zobrazí predikovaný stav při přidávání nového míčku, lze tím dobře srovnávat úspěšnost predikce
 		if(debug){
-			stroke(0, 255, 0);
+			stroke(255, 0, 255);
 			noFill();
 			ellipse(predictedState.sposition.x, predictedState.sposition.y, predictedState.ssize.x, predictedState.ssize.y);
 			noStroke();
@@ -291,7 +291,7 @@ class Ball {
 			text(debugString, state.sposition.x, state.sposition.y-state.ssize.y/2);
 			textAlign(CENTER, CENTER);
 			// zobrazení id
-			fill(0, 0, 255);
+			fill(255, 255, 255);
 			textSize(28);
 			text(""+id, state.sposition.x, state.sposition.y);
 		}

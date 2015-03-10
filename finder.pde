@@ -21,7 +21,7 @@ class Finder {
 
 		ArrayList<State> circles = new ArrayList<State>();
 
-		float lastCircleProbability = 0.2;
+		float lastCircleProbability = 0.15;
 		int maxCircles = circleCount;
 		while(maxCircles-- > 0){
 			int[][] histogram = new int[size][size];

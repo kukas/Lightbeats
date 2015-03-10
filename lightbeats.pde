@@ -41,18 +41,21 @@ int avgStateCount = 7;
 float colorWeight = 0.3;
 float positionWeight = 0.5;
 float predictedPositionWeight = 0.5;
-float sizeWeight = 0.3;
+float sizeWeight = 0.4;
 // - maximal values
 float dColorMax = 8;
-float dPositionMax = pow(13, 2);
-float dPredictedPositionMax = pow(10, 2);
+float dPositionMax = pow(11, 2);
+float dPredictedPositionMax = pow(8, 2);
 float dSizeMax = pow(5, 2);
 
-// prediction
-float correctionWeight = 0.5;
-
 // ball detection
-float ballProbabilityThreshold = 0.5; // po jaké hodnotě se glob považuje za míček
+float ballProbabilityThreshold = 0.2; // po jaké hodnotě se glob považuje za míček
+
+
+// zapne fullscreen
+boolean sketchFullScreen() {
+	return false;
+}
 
 JMyron m;
 int[][] globArray;
@@ -75,10 +78,9 @@ int[] lastCamPixels;
 int[] camPixels;
 //-----------------------------------------------------------------------------------------------------------
 //SETUP
-
 void setup() {
-	// size(camResX, camResY);
-	size(displayWidth, displayHeight);
+	size(camResX, camResY);
+	// size(displayWidth, displayHeight);
 	
 	m = new JMyron();
 	m.start(camResX, camResY);
@@ -141,7 +143,7 @@ void draw() {
 	globPixels = m.globEdgePoints(1);
 	if(debug){
 		// Zobrazí obrázek z webkamery
-		m.imageCopy(debugView.pixels);
+		debugView.pixels = camPixels;
 		debugView.updatePixels();
 		image(debugView, 0, 0);
 

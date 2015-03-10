@@ -79,7 +79,7 @@ class Balls {
 
 				int circleCount = 0;
 				for (float probability : probabilities) {
-					if(probability > 0.6 && circleCount < 2){
+					if(probability > 0.7 && circleCount < 2){
 						circleCount++;
 					}
 					else {
@@ -97,14 +97,14 @@ class Balls {
 				if(circleCount > 0){
 					int[][] boundary = globPixels[state.globId];
 					ArrayList<State> circles = finder.findCircles(boundary, state, circleCount);
-					// strokeWeight(3);
-					// noFill();
-					// for (int j=0; j<circles.size(); j++) {
-					// 	State circle = circles.get(j);
-					// 	stroke(j*255, 255, 0, 128);
-					// 	ellipse(circle.sposition.x, circle.sposition.y, circle.ssize.x, circle.ssize.y);
-					// }
-					// strokeWeight(1);
+					strokeWeight(3);
+					noFill();
+					for (int j=0; j<circles.size(); j++) {
+						State circle = circles.get(j);
+						stroke(j*255, 255, 0, 128);
+						ellipse(circle.sposition.x, circle.sposition.y, circle.ssize.x, circle.ssize.y);
+					}
+					strokeWeight(1);
 
 					if(circles.size() == 1){
 						Ball bestBall = ballsProbabilities.get(probabilities[0]);
@@ -119,11 +119,6 @@ class Balls {
 						}
 					}
 					if(circles.size() == 2){
-						// states.remove(state);
-						// states.addAll(circles);
-						// i += 2;
-						// continue;
-
 						Ball bestBall = ballsProbabilities.get(probabilities[0]);
 						float newProbability1 = bestBall.getProbability(circles.get(0));
 						float newProbability2 = bestBall.getProbability(circles.get(1));
@@ -133,13 +128,9 @@ class Balls {
 							state = circles.get(0);
 							ballsProbabilities.put(newProbability1, bestBall);
 							probabilities[0] = newProbability1;
-							fill(255,0,0);
-							text(""+newProbability1, 0, 0);
-							fill(0,255,0);
-							text(""+newProbability2, 0, 0);
-							
-							// states.add(circles.get(1));
-							// i++;
+
+							states.add(circles.get(1));
+							i++;
 						}
 						if(newProbability2 > newProbability1 && newProbability2 > probabilities[0]){
 							states.remove(state);
@@ -148,14 +139,14 @@ class Balls {
 							ballsProbabilities.put(newProbability2, bestBall);
 							probabilities[0] = newProbability2;
 
-							// states.add(circles.get(0));
-							// i++;
+							states.add(circles.get(0));
+							i++;
 						}
 					}
 				}
 
 				// známý míček
-				if(probabilities[0] > 0.6){
+				if(probabilities[0] > 0.7){
 					Ball ball = ballsProbabilities.get(probabilities[0]);
 					ball.updateBall(state);
 					states.remove(state);
