@@ -101,51 +101,27 @@ class Ball {
 					// pokud máme 3 a více stavů, můžeme vypočítat rychlost a zrychlení
 					State state3 = getState(2); // předpředposlední stav
 
-					// TODO: Opravit korekci, nějak blbne
-					// korekce se týká připadu, kdy míček mizí za překážkou a zmenšuje se mu velikost
-					// při zmenšující se velikosti se totiž přesouvá i střed, který pak nekoresponduje s reálným
-					// PVector state1CorrectedPosition;
-					// PVector state2CorrectedPosition;
-					// PVector state3CorrectedPosition;
-
-					// if(PVector.sub(state1.sposition, state2.sposition).dot(new PVector(1.0, 1.0)) > 0){
-					// 	state1CorrectedPosition = PVector.sub(avgState.ssize, state1.ssize);
-					// 	state2CorrectedPosition = PVector.sub(avgState.ssize, state2.ssize);
-					// 	state3CorrectedPosition = PVector.sub(avgState.ssize, state3.ssize);
-					// }
-					// else {
-					// 	state1CorrectedPosition = PVector.sub(state1.ssize, avgState.ssize);
-					// 	state2CorrectedPosition = PVector.sub(state2.ssize, avgState.ssize);
-					// 	state3CorrectedPosition = PVector.sub(state3.ssize, avgState.ssize);
-					// }
-
-					// state1CorrectedPosition.mult(0.5);
-					// state2CorrectedPosition.mult(0.5);
-					// state3CorrectedPosition.mult(0.5);
-					// state1CorrectedPosition.add(state1.sposition);
-					// state2CorrectedPosition.add(state2.sposition);
-					// state3CorrectedPosition.add(state3.sposition);
-
-
+					float t0 = frameTimestamp - state1.timestamp;
 					float t1 = state1.timestamp-state2.timestamp;
 					float t2 = state2.timestamp-state3.timestamp;
 
-					// poslední rychlost
-					// PVector v1 = PVector.sub(state1CorrectedPosition, state2CorrectedPosition);
+					// v1 - poslední rychlost míčku
 					PVector v1 = PVector.sub(state1.sposition, state2.sposition);
 					v1.div(t1);
 
-					// předposlední rychlost
-					// PVector v2 = PVector.sub(state2CorrectedPosition, state3CorrectedPosition);
+					// v2 - předposlední rychlost míčku
 					PVector v2 = PVector.sub(state2.sposition, state3.sposition);
 					v2.div(t2);
 
+					// P0 = P1 + 1/2 * (v1-v2)/t2*t1*t0 + v1*t0
+					// zrychlení
 					predictedState.sposition.set(v1);
-					predictedState.sposition.mult(t1+t2);
-					predictedState.sposition.sub( PVector.div(PVector.mult(v2, t1+t2), 2.0) );
-					// predictedState.sposition.add(state1CorrectedPosition);
-					predictedState.sposition.add(state1.sposition);
+					predictedState.sposition.sub(v2);
+					predictedState.sposition.mult(0.5*t0*t1/t2);
+					// rychlost
+					predictedState.sposition.add(PVector.mult(v1, t0));
 
+					predictedState.sposition.add(state1.sposition);
 				}
 				else {
 					// pokud máme pouze 2 stavy, lze vypočítat rychlost
@@ -161,6 +137,7 @@ class Ball {
 					predictedState.sposition.set(state1.sposition);
 					predictedState.sposition.sub(state2.sposition);
 					predictedState.sposition.mult(t0/t1);
+
 					predictedState.sposition.add(state1.sposition);
 				}
 
