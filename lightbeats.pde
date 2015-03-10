@@ -71,6 +71,8 @@ Balls balls;
 // view
 Renderer renderer;
 
+int[] lastCamPixels;
+int[] camPixels;
 //-----------------------------------------------------------------------------------------------------------
 //SETUP
 
@@ -108,6 +110,24 @@ void setup() {
 
 void draw() {
 	m.update();
+
+	// srovnání posledních obrázků
+	camPixels = m.image();
+	if(lastCamPixels != null){
+		boolean same = true;
+		// projde 2x každý 10. řádek
+		for (int x = 0; x < camResX*camResY; x += 24*camResX-3) {
+			if(camPixels[x] - lastCamPixels[x] != 0){
+				same = false;
+				break;
+			}
+		}
+		if(same){
+			return;
+		}
+	}
+	lastCamPixels = camPixels;
+
 	int now = millis();
 	deltaTime = now - frameTimestamp;
 	frameTimestamp = now;
