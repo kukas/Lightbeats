@@ -24,6 +24,7 @@ import controlP5.*;
 // camera
 int camResX = 640;
 int camResY = 480;
+int camRate = 60;
 
 // jmyron
 float threshold = 130;
@@ -54,10 +55,10 @@ float ballProbabilityThreshold = 0.2; // po jaké hodnotě se glob považuje za 
 
 // zapne fullscreen
 boolean sketchFullScreen() {
-	return false;
+	return true;
 }
 
-JMyron m;
+Myron m;
 int[][] globArray;
 int[][][] globPixels;
 
@@ -79,23 +80,19 @@ int[] camPixels;
 //-----------------------------------------------------------------------------------------------------------
 //SETUP
 void setup() {
-	size(camResX, camResY);
-	// size(displayWidth, displayHeight);
-	
-	m = new JMyron();
-	m.start(camResX, camResY);
-	m.findGlobs(1);
-	m.trackNotColor(0,0,0,255);
-	m.minDensity(50);
-	m.maxDensity(1000);
-	m.sensitivity(threshold);
-
+	// size(camResX, camResY);
+	size(displayWidth, displayHeight);
 	frameRate(-1);
+	
+	m = new Myron(this);
+	if(! m.start(CLCamera.CLEYE_VGA, camRate) ) // 640x480, 60fps
+		exit();
+	
+	m.threshold(threshold);
 
 	debugView = createImage(camResX, camResY, ARGB);
 
 	cp5 = new ControlP5(this);
-	cp5.addButton("cameraSettings").setPosition(10,10).setSize(128,15);
 	cp5.addSlider("brightnessThreshold", 0, 255, threshold, 10, 40, 128, 15).setNumberOfTickMarks(256);
 	cp5.addSlider("ballProbabilityThreshold", 0, 1, ballProbabilityThreshold, 10, 70, 128, 15);
 	if(!debug)
@@ -105,6 +102,9 @@ void setup() {
 	renderer = new Renderer(balls);
 
 	renderer.init();
+
+	lastCamPixels = new int[camResX*camResY];
+	camPixels = new int[camResX*camResY];
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -114,43 +114,36 @@ void draw() {
 	m.update();
 
 	// srovnání posledních obrázků
-	camPixels = m.image();
-	if(lastCamPixels != null){
-		boolean same = true;
-		// projde 2x každý 10. řádek
-		for (int x = 0; x < camResX*camResY; x += 24*camResX-3) {
-			if(camPixels[x] - lastCamPixels[x] != 0){
-				same = false;
-				break;
-			}
-		}
-		if(same){
-			return;
-		}
-	}
-	lastCamPixels = camPixels;
+	// camPixels = m.camPixels;
+	// boolean same = true;
+	// for (int x = 0; x < camResX*camResY; x += 1) {
+	// 	if(camPixels[x] != lastCamPixels[x]){
+	// 		same = false;
+	// 		break;
+	// 	}
+	// }
+	// if(same){
+	// 	println("tadá :(");
+	// 	return;
+	// }
+	// arrayCopy(camPixels, lastCamPixels);
 
 	int now = millis();
 	deltaTime = now - frameTimestamp;
 	frameTimestamp = now;
 	
-	pushMatrix();
+	// pushMatrix();
 
 	// scale(min(width/float(camResX), height/float(camResY)));
 	background(0); //Set background black
 
 	globArray = m.globBoxes();
-	globPixels = m.globEdgePoints(1);
+	globPixels = m.globEdgePoints();
 	if(debug){
 		// Zobrazí obrázek z webkamery
-		debugView.pixels = camPixels;
-		debugView.updatePixels();
-		image(debugView, 0, 0);
+		m.debugPixels(m.camPixels);
+		// m.debugPixels(m.globPixels);
 
-		// Zakreslí okraje globů
-		// int globPixels[][][] = m.globPixels();
-		
-		noFill();
 		for(int i=0;i<globArray.length;i++){
 			int[][] boundary = globPixels[i];
 			int[] globBox = globArray[i];
@@ -167,25 +160,20 @@ void draw() {
 				continue;
 			}
 
-			stroke(255, 0, 0, 80);
+			stroke(255, 0, 0);
 			strokeWeight(1);
 			if(boundary!=null){
 				beginShape(POINTS);
-				for(int j=0;j<boundary.length;j++){
+				for(int j=0;j<boundary.length;j+=3){
 					vertex(boundary[j][0], boundary[j][1]);
 				}
 				endShape();
 			}
 
-			rect(globBox[0], globBox[1], globBox[2], globBox[3]);
-
-			// ArrayList<State> circles = balls.finder.findCircles(boundary, globBox);
-			// strokeWeight(3);
-			// for (int j=0; j<circles.size(); j++) {
-			// 	State circle = circles.get(j);
-			// 	stroke(j*255, 255, 0, 128);
-			// 	ellipse(circle.sposition.x, circle.sposition.y, circle.ssize.x, circle.ssize.y);
-			// }
+			// stroke(255, 0, 0);
+			// textAlign(LEFT, BOTTOM);
+			// text(i, globBox[0], globBox[1]);
+			// rect(globBox[0], globBox[1], globBox[2], globBox[3]);
 		}
 	}
 
@@ -194,7 +182,7 @@ void draw() {
 	if(debug){
 		balls.render();
 	}
-	popMatrix();
+	// popMatrix();
 
 	if(!debug){
 		renderer.render();
@@ -210,6 +198,7 @@ void draw() {
 	if(capture){
 		saveFrame("frames/####.tga");
 	}
+
 	if(debug){
 		// FPS
 		fill(255,255,0);
@@ -223,13 +212,9 @@ void draw() {
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //User input - calibrating camera and animation
 	
-void cameraSettings() {
-	m.settings();//click the window to get the settings of camera
-}
-
 void brightnessThreshold(float t) {
 	threshold = t;
-	m.sensitivity(threshold);
+	m.threshold(threshold);
 }
 
 //by pressing arrow key up and down you animate movement of previous frames along x axis 
@@ -241,8 +226,8 @@ void keyPressed() {
 			break;
 		case 'A':
 			// m.adapt();
-			color c = m.average(0, 0, camResX, camResY);
-			m.trackNotColor(int(red(c)), int(green(c)), int(blue(c)), 255);
+			// color c = m.average(0, 0, camResX, camResY);
+			// m.trackNotColor(int(red(c)), int(green(c)), int(blue(c)), 255);
 			balls.adapt();
 			break;
 		case 'D':
