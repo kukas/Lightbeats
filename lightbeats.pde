@@ -94,19 +94,26 @@ void setup() {
 	float gain = m.getGain();
 	cp5.addSlider("gain")
 		.setPosition(10, 10)
-		.setSize(100, 15)
+		.setSize(128, 15)
 		.setRange(0, 100)
 		.setValue(gain*100);
 
 	float exposure = m.getExposure();
 	cp5.addSlider("exposure")
 		.setPosition(10, 40)
-		.setSize(100, 15)
+		.setSize(128, 15)
 		.setRange(0, 100)
 		.setValue(exposure*100);
 
 	cp5.addSlider("brightnessThreshold", 0, 255, threshold, 10, 70, 128, 15).setNumberOfTickMarks(256);
-	cp5.addSlider("debugView", 0, 1, debugView, 10, 100, 128, 15).setNumberOfTickMarks(2);
+	int globSize = m.getMinDensity();
+	cp5.addSlider("minGlobSize")
+		.setPosition(10, 100)
+		.setSize(128, 15)
+		.setRange(0, 200)
+		.setValue(globSize);
+
+	cp5.addSlider("debugView", 0, 1, debugView, 10, 130, 128, 15).setNumberOfTickMarks(2);
 	if(!debug)
 		cp5.hide();
 
@@ -237,6 +244,10 @@ void gain(float value) {
 
 void exposure(float value) {
 	m.setExposure(value/100.0);
+}
+
+void minGlobSize(float value) {
+	m.setMinDensity((int) value);
 }
 
 //by pressing arrow key up and down you animate movement of previous frames along x axis 

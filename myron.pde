@@ -104,6 +104,14 @@ class Myron {
 		return cam.getCameraParam(CLCamera.CLEYE_EXPOSURE)/511.0;
 	}
 
+	int getMinDensity() {
+		return minDensity;
+	}
+
+	void setMinDensity(int value) {
+		minDensity = value;
+	}
+
 	void debugPixels(int[] p) {
 		img.pixels = p;
 		img.updatePixels();
@@ -285,7 +293,7 @@ class Myron {
 	color average(int x1, int y1, int x2, int y2) {
 		x1 = max(x1, 0);
 		y1 = max(y1, 0);
-		x2 = min(x2, width);
+		x2 = min(x2, width-1);
 		y2 = min(y2, height-1);
 
 		int r = 0;
