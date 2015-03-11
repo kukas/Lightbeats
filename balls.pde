@@ -157,7 +157,7 @@ class Balls {
 					continue;
 				}
 				// nový míček!
-				if(probabilities[0] < 0.3){
+				if(probabilities[0] < 0.4){
 					addBall(state);
 					states.remove(state);
 					continue;
