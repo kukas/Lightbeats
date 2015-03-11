@@ -186,15 +186,15 @@ class Finder {
 			pointCount = newPointCount;
 			boundary = newBoundary;
 
-			stroke(255, 0, 0);
-			strokeWeight(1);
-			if(boundary!=null){
-				beginShape(POINTS);
-				for(int j=0;j<boundary.length;j++){
-					vertex(boundary[j][0], boundary[j][1]);
-				}
-				endShape();
-			}
+			// stroke(255, 0, 0);
+			// strokeWeight(1);
+			// if(boundary!=null){
+			// 	beginShape(POINTS);
+			// 	for(int j=0;j<boundary.length;j++){
+			// 		vertex(boundary[j][0], boundary[j][1]);
+			// 	}
+			// 	endShape();
+			// }
 		}
 
 		if(circles.size() == 2){

@@ -8,6 +8,9 @@ class Myron {
 	int width;
 	int height;
 	int pixelCount;
+	// camera settings
+	float gain = 0;
+	float exposure = 0.6;
 
 	// image processing
 	// - settings
@@ -59,8 +62,8 @@ class Myron {
 		cam.setCameraParam(CLCamera.CLEYE_AUTO_EXPOSURE, 0);
 		cam.setCameraParam(CLCamera.CLEYE_AUTO_WHITEBALANCE, 1);
 
-		setGain(0);
-		setExposure(0.6);
+		setGain(gain);
+		setExposure(exposure);
 
 		cam.startCamera();
 
@@ -84,11 +87,21 @@ class Myron {
 	}
 
 	void setGain(float value) {
+		gain = value;
 		cam.setCameraParam(CLCamera.CLEYE_GAIN, floor(value*79));
 	}
 
+	float getGain() {
+		return cam.getCameraParam(CLCamera.CLEYE_GAIN)/79.0;
+	}
+
 	void setExposure(float value) {
+		exposure = value;
 		cam.setCameraParam(CLCamera.CLEYE_EXPOSURE, floor(value*511));
+	}
+
+	float getExposure() {
+		return cam.getCameraParam(CLCamera.CLEYE_EXPOSURE)/511.0;
 	}
 
 	void debugPixels(int[] p) {
