@@ -41,6 +41,7 @@ class Renderer {
 	void render() {
 		pushMatrix();
 
+		translate((width - height/float(camResY)*float(camResX))/2.0, 0);
 		scale(min(width/float(camResX), height/float(camResY)));
 
 		noStroke();
@@ -83,26 +84,30 @@ class Renderer {
 				// }
 
 				// KACHNY!!!! (vypadaj suprově)
+				if(ball.stateHistory.size() < 2)
+					continue;
 				State state = ball.getState();
-				float r = sqrt(state.ssize.x*state.ssize.x + state.ssize.y*state.ssize.y);
-				duck.display(frameTimestamp-ball.timestamp, state.sposition.x, state.sposition.y, r, r);
-			}
-		}
-
-		noFill();
-		stroke(255, 255, 255, 128);
-		strokeWeight(3);
-		for (int i = 0; i < balls.balls.size()-1; i++) {
-			for (int j = i+1; j < balls.balls.size(); j++	) {
-				Ball b1 = balls.balls.get(i);
-				Ball b2 = balls.balls.get(j);
-				if(b1.ballProbability == 1 && b2.ballProbability == 1){
-					State s1 = b1.avgState;
-					State s2 = b2.avgState;
-					line(s1.sposition.x, s1.sposition.y, s2.sposition.x, s2.sposition.y);
+				if(!state.predicted){
+					float r = sqrt(state.ssize.x*state.ssize.x + state.ssize.y*state.ssize.y);
+					duck.display(frameTimestamp-ball.timestamp, state.sposition.x, state.sposition.y, 2.5*r, 2.5*r);
 				}
 			}
 		}
+
+		// noFill();
+		// stroke(255, 255, 255, 128);
+		// strokeWeight(3);
+		// for (int i = 0; i < balls.balls.size()-1; i++) {
+		// 	for (int j = i+1; j < balls.balls.size(); j++	) {
+		// 		Ball b1 = balls.balls.get(i);
+		// 		Ball b2 = balls.balls.get(j);
+		// 		if(b1.ballProbability == 1 && b2.ballProbability == 1){
+		// 			State s1 = b1.avgState;
+		// 			State s2 = b2.avgState;
+		// 			line(s1.sposition.x, s1.sposition.y, s2.sposition.x, s2.sposition.y);
+		// 		}
+		// 	}
+		// }
 
 		popMatrix();
 	}
