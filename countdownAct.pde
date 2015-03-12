@@ -6,8 +6,9 @@ class CountdownAct extends Act {
 		filtr_sum = createImage( width, height, ARGB );
 	}
 
-	void show() {
-		super.show();
+	void hide() {
+		lecture.rewind();
+		lecture.play();
 	}
 
 	void draw() {

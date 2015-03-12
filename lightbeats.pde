@@ -2,6 +2,7 @@ import ddf.minim.*;
 
 Minim minim;
 AudioPlayer player;
+AudioPlayer lecture;
 Show show;
 
 //FULLSCREEN---------------------------------------------
@@ -16,6 +17,8 @@ void setup(){
 	//SOUND
 	minim = new Minim(this);
 	player = minim.loadFile("diaprojector_button.wav");
+	//LECTURE
+	lecture = minim.loadFile("myubridge_opening_lecture.mp3");
 
 	show = new Show();
 
