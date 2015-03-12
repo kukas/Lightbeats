@@ -91,30 +91,38 @@ class LB {
 				.setPosition(10, 10)
 				.setSize(128, 15)
 				.setRange(0, 100)
-				.setValue(gain*100);
+				.setValue(gain*100)
+				.plugTo(this);
 
 			float exposure = m.getExposure();
 			cp5.addSlider("exposure")
 				.setPosition(10, 40)
 				.setSize(128, 15)
 				.setRange(0, 100)
-				.setValue(exposure*100);
+				.setValue(exposure*100)
+				.plugTo(this);
 		}
 		else {
 			cp5.addButton("cameraSettings")
 				.setPosition(10, 10)
-				.setSize(128, 15);
+				.setSize(128, 15)
+				.plugTo(this);
 		}
 
-		cp5.addSlider("brightnessThreshold", 0, 255, threshold, 10, 70, 128, 15).setNumberOfTickMarks(256);
+		cp5.addSlider("brightnessThreshold", 0, 255, threshold, 10, 70, 128, 15)
+			.setNumberOfTickMarks(256)
+			.plugTo(this);
 		int globSize = m.getMinDensity();
 		cp5.addSlider("minGlobSize")
 			.setPosition(10, 100)
 			.setSize(128, 15)
 			.setRange(0, 200)
-			.setValue(globSize);
+			.setValue(globSize)
+			.plugTo(this);
 
-		cp5.addSlider("debugView", 0, 1, debugView, 10, 130, 128, 15).setNumberOfTickMarks(2);
+		cp5.addSlider("debugView", 0, 1, debugView, 10, 130, 128, 15)
+			.setNumberOfTickMarks(2)
+			.plugTo(this);
 		if(!debug)
 			cp5.hide();
 
