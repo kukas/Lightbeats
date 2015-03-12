@@ -12,7 +12,7 @@ class Ball {
 	boolean updated;
 
 	int id;
-	int timestamp;
+	long timestamp;
 
 	// průměrný stav z posledních avgStateCount stavů
 	State avgState;
@@ -101,9 +101,9 @@ class Ball {
 					// pokud máme 3 a více stavů, můžeme vypočítat rychlost a zrychlení
 					State state3 = getState(2); // předpředposlední stav
 
-					float t0 = frameTimestamp - state1.timestamp;
-					float t1 = state1.timestamp-state2.timestamp;
-					float t2 = state2.timestamp-state3.timestamp;
+					float t0 = (frameTimestamp - state1.timestamp)*1E-6;
+					float t1 = (state1.timestamp-state2.timestamp)*1E-6;
+					float t2 = (state2.timestamp-state3.timestamp)*1E-6;
 
 					// v1 - poslední rychlost míčku
 					PVector v1 = PVector.sub(state1.sposition, state2.sposition);
@@ -132,8 +132,8 @@ class Ball {
 					// |    |===================== poslední pozice
 					// |========================== nová pozice
 
-					float t0 = frameTimestamp - state1.timestamp;
-					float t1 = state1.timestamp - state2.timestamp;
+					float t0 = (frameTimestamp   - state1.timestamp)*1E-6;
+					float t1 = (state1.timestamp - state2.timestamp)*1E-6;
 					predictedState.sposition.set(state1.sposition);
 					predictedState.sposition.sub(state2.sposition);
 					predictedState.sposition.mult(t0/t1);

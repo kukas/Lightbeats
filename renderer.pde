@@ -89,7 +89,7 @@ class Renderer {
 				State state = ball.getState();
 				if(!state.predicted){
 					float r = sqrt(state.ssize.x*state.ssize.x + state.ssize.y*state.ssize.y);
-					duck.display(frameTimestamp-ball.timestamp, state.sposition.x, state.sposition.y, 2.5*r, 2.5*r);
+					duck.display((frameTimestamp-ball.timestamp)*1E-6, state.sposition.x, state.sposition.y, 2.5*r, 2.5*r);
 				}
 			}
 		}

@@ -2,7 +2,7 @@ class State {
 	color scolor;
 	PVector sposition;
 	PVector ssize;
-	int timestamp;
+	long timestamp;
 
 	int globId;
 	boolean predicted = false;

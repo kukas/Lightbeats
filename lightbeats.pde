@@ -24,7 +24,7 @@ import controlP5.*;
 // camera
 int camResX = 640;
 int camResY = 480;
-int camRate = 60;
+int camRate = 75;
 
 // jmyron
 float threshold = 130;
@@ -65,8 +65,9 @@ int[][][] globPixels;
 
 ControlP5 cp5;
 
-int frameTimestamp;
-int deltaTime;
+long setupTimestamp;
+long frameTimestamp;
+float deltaTime;
 
 // processing
 Balls balls;
@@ -82,6 +83,7 @@ void setup() {
 	// size(camResX, camResY);
 	size(displayWidth, displayHeight);
 	frameRate(-1);
+	setupTimestamp = System.nanoTime();
 	
 	m = new Myron(this);
 	if(! m.start(CLCamera.CLEYE_VGA, camRate) ) // 640x480, 60fps
@@ -147,8 +149,8 @@ void draw() {
 	// }
 	// arrayCopy(camPixels, lastCamPixels);
 
-	int now = millis();
-	deltaTime = now - frameTimestamp;
+	long now = System.nanoTime() - setupTimestamp;
+	deltaTime = (now - frameTimestamp)*1E-6;
 	frameTimestamp = now;
 	
 	// pushMatrix();
@@ -213,7 +215,7 @@ void draw() {
 		fill(255,255,0);
 		textSize(16);
 		textAlign(RIGHT, BOTTOM);
-		text(int(frameTimestamp), width-10, height-10);
+		text(round(frameTimestamp*1E-6), width-10, height-10);
 	}
 
 	if(capture){
