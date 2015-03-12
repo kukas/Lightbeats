@@ -92,19 +92,26 @@ void setup() {
 
 	cp5 = new ControlP5(this);
 
-	float gain = m.getGain();
-	cp5.addSlider("gain")
-		.setPosition(10, 10)
-		.setSize(128, 15)
-		.setRange(0, 100)
-		.setValue(gain*100);
+	if(m.usingCL){
+		float gain = m.getGain();
+		cp5.addSlider("gain")
+			.setPosition(10, 10)
+			.setSize(128, 15)
+			.setRange(0, 100)
+			.setValue(gain*100);
 
-	float exposure = m.getExposure();
-	cp5.addSlider("exposure")
-		.setPosition(10, 40)
-		.setSize(128, 15)
-		.setRange(0, 100)
-		.setValue(exposure*100);
+		float exposure = m.getExposure();
+		cp5.addSlider("exposure")
+			.setPosition(10, 40)
+			.setSize(128, 15)
+			.setRange(0, 100)
+			.setValue(exposure*100);
+	}
+	else {
+		cp5.addButton("cameraSettings")
+			.setPosition(10, 10)
+			.setSize(128, 15);
+	}
 
 	cp5.addSlider("brightnessThreshold", 0, 255, threshold, 10, 70, 128, 15).setNumberOfTickMarks(256);
 	int globSize = m.getMinDensity();
@@ -237,6 +244,11 @@ void draw() {
 void brightnessThreshold(float t) {
 	threshold = t;
 	m.threshold(threshold);
+}
+
+void cameraSettings() {
+	if(!m.usingCL)
+		m.m.settings();
 }
 
 void gain(float value) {
