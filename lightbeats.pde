@@ -31,7 +31,7 @@ void setup(){
 	show.addAct(new OldTrackingAct());
 	show.addAct(new ZoetropeAct("zoetrope.jpg"));
 	// horse animation
-	HorseSlideshowAct act = new HorseSlideshowAct("milimetrovy_orez.jpg");
+	HorseSlideshowAct act = new HorseSlideshowAct("milimetr_res.png");
 	act.wait = 1000000;
 	show.addAct(act);
 	for (int i=0;i<7;i++){
