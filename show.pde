@@ -44,4 +44,8 @@ class Show {
 	void keyPressed() {
 		act().keyPressed();
 	}
+
+	void stop() {
+		act().hide();
+	}
 }

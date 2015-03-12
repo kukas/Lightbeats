@@ -54,4 +54,14 @@ void draw() {
 //KEYBOARD ARROWS--------------------------------------------------------
 void keyPressed() {
 	show.keyPressed();
+	switch(keyCode) {
+		case 27: // ESCAPE
+			stop();
+			break;
+	}
+}
+
+public void stop() {
+	show.stop();
+	super.stop();
 }

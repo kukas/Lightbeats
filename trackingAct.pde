@@ -76,7 +76,7 @@ class LB {
 	//SETUP
 	void setup() {
 		setupTimestamp = System.nanoTime();
-		println("oiareja");
+
 		m = new Myron(parent);
 		if(! m.start(CLCamera.CLEYE_VGA, camRate) ) // 640x480, 60fps
 			exit();
@@ -127,8 +127,10 @@ class LB {
 	//-----------------------------------------------------------------------------------------------------------
 	//DRAW
 
-	void draw() {
-		m.update();
+	void draw(int scene) {
+		if(scene < 2){
+			m.update();
+		}
 
 		long now = System.nanoTime() - setupTimestamp;
 		deltaTime = (now - frameTimestamp)*1E-6;
@@ -167,15 +169,16 @@ class LB {
 				rect(globBox[0], globBox[1], globBox[2], globBox[3]);
 			}
 		}
-
-		balls.processGlobs(globArray, globPixels);
+		if(scene < 2){
+			balls.processGlobs(globArray, globPixels);
+		}
 
 		if(debug){
 			balls.render();
 		}
 
 		if(!debug){
-			renderer.render();
+			renderer.render(scene);
 		}
 
 		if(debug) {
@@ -263,19 +266,27 @@ class LB {
 class TrackingAct extends Act {
 	LB lightbeats;
 	PApplet papplet;
+	AudioPlayer shotgun;
+
+	int scene = 0;
 	TrackingAct(PApplet papplet) {
 		this.papplet = papplet;
 	}
 	void init() {
 		lightbeats = new LB(papplet);
+		shotgun = minim.loadFile("shotgun.wav");
 	}
 
 	void show() {
 		lightbeats.setup();
+		scene = 0;
 	}
 
 	void draw() {
-		lightbeats.draw();
+		lightbeats.draw(scene);
+		stroke(255);
+		fill(255);
+		text(scene+"", 200, 200);
 	}
 
 	void hide() {
@@ -284,10 +295,15 @@ class TrackingAct extends Act {
 
 	void keyPressed() {
 		lightbeats.keyPressed();
-
 		switch(keyCode){
 			case RIGHT:
-				parent.next();
+				scene++;
+				if(scene == 2){
+					shotgun.rewind();
+					shotgun.play();
+				}
+				if(scene >= 3)
+					parent.next();
 				break;
 			case LEFT:
 				parent.prev();
