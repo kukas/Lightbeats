@@ -1,14 +1,18 @@
 import cl.eye.*;
+import JMyron.*;
 
 class Myron {
-	// cam access
+	// cam access JMyron
+	JMyron m;
+	// cam access CL-Eye
+	boolean usingCL = false;
 	PApplet papplet;
 	CLCamera cam;
 	int[] camPixels;
 	int width;
 	int height;
 	int pixelCount;
-	// camera settings
+	// camera settings (CL-Eye only)
 	float gain = 0;
 	float exposure = 0.6;
 
@@ -41,13 +45,16 @@ class Myron {
 	}
 
 	boolean start(int resolution, int rate) {
-		int numCams = CLCamera.cameraCount();
-		println("Found " + numCams + " cameras");
-		if(numCams == 0) return false;
-		println("Camera UUID " + CLCamera.cameraUUID(0));
-		cam = new CLCamera(papplet);
-		// ----------------------(i, CLEYE_GRAYSCALE/COLOR, CLEYE_QVGA/VGA, Framerate)
-		cam.createCamera(0, CLCamera.CLEYE_COLOR, resolution, rate);
+		int numCams = 0;
+		try {
+			numCams = CLCamera.cameraCount();
+		} catch (UnsatisfiedLinkError e) {
+			println("CL eye SDK is not installed!");
+			println(e.toString());
+		}
+
+		println("Found " + numCams + " CL Eye cameras");
+
 		if(resolution == CLCamera.CLEYE_VGA){
 			width = 640;
 			height = 480;
@@ -56,17 +63,17 @@ class Myron {
 			width = 320;
 			height = 240;
 		}
+
+		if(numCams == 0) {
+			println("Falling back to JMyron");
+			startJMyron(width, height);
+		}
+		else {
+			println("Starting CL Eye");
+			startCLEye(resolution, rate);
+		}
+
 		pixelCount = width*height;
-
-		cam.setCameraParam(CLCamera.CLEYE_AUTO_GAIN, 0);
-		cam.setCameraParam(CLCamera.CLEYE_AUTO_EXPOSURE, 0);
-		cam.setCameraParam(CLCamera.CLEYE_AUTO_WHITEBALANCE, 1);
-
-		setGain(gain);
-		setExposure(exposure);
-
-		cam.startCamera();
-
 		camPixels = new int[pixelCount];
 		globPixels = new boolean[pixelCount];
 		globIDs = new int[pixelCount];
@@ -86,21 +93,53 @@ class Myron {
 		return true;
 	}
 
+	void startJMyron(int camResX, int camResY) {
+		m = new JMyron();
+		m.start(camResX, camResY);
+		m.findGlobs(0);
+	}
+
+	void startCLEye(int resolution, int rate) {
+		usingCL = true;
+
+		println("Camera UUID " + CLCamera.cameraUUID(0));
+		cam = new CLCamera(papplet);
+		// ----------------------(i, CLEYE_GRAYSCALE/COLOR, CLEYE_QVGA/VGA, Framerate)
+		cam.createCamera(0, CLCamera.CLEYE_COLOR, resolution, rate);
+
+		cam.setCameraParam(CLCamera.CLEYE_AUTO_GAIN, 0);
+		cam.setCameraParam(CLCamera.CLEYE_AUTO_EXPOSURE, 0);
+		cam.setCameraParam(CLCamera.CLEYE_AUTO_WHITEBALANCE, 1);
+
+		setGain(gain);
+		setExposure(exposure);
+
+		cam.startCamera();
+	}
+
 	void setGain(float value) {
+		if(!usingCL)
+			return;
 		gain = value;
 		cam.setCameraParam(CLCamera.CLEYE_GAIN, floor(value*79));
 	}
 
 	float getGain() {
+		if(!usingCL)
+			return 0;
 		return cam.getCameraParam(CLCamera.CLEYE_GAIN)/79.0;
 	}
 
 	void setExposure(float value) {
+		if(!usingCL)
+			return;
 		exposure = value;
 		cam.setCameraParam(CLCamera.CLEYE_EXPOSURE, floor(value*511));
 	}
 
 	float getExposure() {
+		if(!usingCL)
+			return 0;
 		return cam.getCameraParam(CLCamera.CLEYE_EXPOSURE)/511.0;
 	}
 
@@ -126,7 +165,13 @@ class Myron {
 	}
 
 	void update() {
-		cam.getCameraFrame(camPixels, 1000);
+		if(usingCL){
+			cam.getCameraFrame(camPixels, 1000);
+		}
+		else{
+			m.update();
+			camPixels = m.image();
+		}
 
 		thresholdFilter();
 		processGlobs();
@@ -283,7 +328,10 @@ class Myron {
 	}
 
 	void stop() {
-		cam.dispose();
+		if(usingCL)
+			cam.dispose();
+		else
+			m.stop();
 	}
 
 	void threshold(float value) {
@@ -291,6 +339,9 @@ class Myron {
 	}
 
 	color average(int x1, int y1, int x2, int y2) {
+		if(!usingCL)
+			return m.average(x1, y1, x2, y2);
+
 		x1 = max(x1, 0);
 		y1 = max(y1, 0);
 		x2 = min(x2, width-1);

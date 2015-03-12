@@ -16,7 +16,6 @@
  *by clicking on running sketch the camera settings should appear
  */
 
-import JMyron.*;
 import controlP5.*;
 
 //---------------------------------------------------------------
