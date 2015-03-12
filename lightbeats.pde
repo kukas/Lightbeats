@@ -28,16 +28,19 @@ void setup(){
 	}
 	// tracking
 	show.addAct(new TrackingAct(this));
+	show.addAct(new OldTrackingAct());
 	show.addAct(new ZoetropeAct("zoetrope.jpg"));
 	// horse animation
+	HorseSlideshowAct act = new HorseSlideshowAct("milimetrovy_orez.jpg");
+	act.wait = 1000000;
+	show.addAct(act);
 	for (int i=0;i<7;i++){
-		HorseSlideshowAct act = new HorseSlideshowAct("konik_"+i+".jpg");
+		act = new HorseSlideshowAct("konik_"+i+".jpg");
 		// poslední koník automaticky nepřepne na další act
 		if(i == 6)
 			act.wait = 100000;
 		show.addAct(act);
 	}
-	show.addAct(new OldTrackingAct());
 	// zoetrope animation
 
 	show.init();

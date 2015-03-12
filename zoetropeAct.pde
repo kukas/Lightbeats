@@ -9,6 +9,9 @@ class ZoetropeAct extends Act {
 	float i = 0;
 	float y = 0;
 
+	int animationTimestamp;
+
+	int scene = 0;
 	ZoetropeAct(String src) {
 		zoetropeSrc = src;
 	}
@@ -20,6 +23,7 @@ class ZoetropeAct extends Act {
 	void show() {
 		super.show();
 		frame = millis();
+		scene = 0;
 
 		player.rewind();
 		player.play();
@@ -39,18 +43,35 @@ class ZoetropeAct extends Act {
 		translate(width/2, zoetrope.height/2); // Translate origin to center
 		imageMode(CENTER); //coordinates start from center of image
 
-		i += y;
-		if (y<1)
-			y += 0.01;
-		else
-			y = 1;
-		
-		float dt = (millis() - showTimestamp)/1000.0;
-		// rotate(PI/7.0*floor(dt*fps) * (1.0-1.0/(1.0+dt*dt*dt*acceleration)) );
-		rotate(PI/7.0 * i);
+		if(scene > 0){
+			i += y;
+			if (y<1)
+				y += 0.01;
+			else
+				y = 1;
+			
+			float dt = (millis() - animationTimestamp)/1000.0;
+			// rotate(PI/7.0*floor(dt*fps) * (1.0-1.0/(1.0+dt*dt*dt*acceleration)) );
+			rotate(PI/7.0 * i);
+		}
 
 		image(zoetrope, 0, 0);
 		popMatrix(); //end of coordinates manipulation revert to default
 		imageMode(CORNER); //revert back to corner image mode
+	}
+
+	void keyPressed() {
+		switch(keyCode){
+			case RIGHT:
+				scene++;
+				if(scene == 1)
+					animationTimestamp = millis();
+				if(scene >= 2)
+					parent.next();
+				break;
+			case LEFT:
+				parent.prev();
+				break;
+		}
 	}
 };
