@@ -27,7 +27,10 @@ void setup(){
 	show.addAct(new CountdownAct());
 	// slides
 	for (int i=0;i<13;i++){
-		show.addAct(new SlideshowAct(i+".jpg"));
+		SlideshowAct slide = new SlideshowAct(i+".jpg");
+		show.addAct(slide);
+		if(i == 0)
+			slide.wait = 5000;
 	}
 	// tracking
 	show.addAct(new TrackingAct(this));
