@@ -1,9 +1,9 @@
 // based on: http://dcgi.felk.cvut.cz/home/sykorad/Sykora08-EGVE.pdf
 
 class Finder {
-
-	public Finder () {
-		
+	LB lb;
+	public Finder (LB lb) {
+		this.lb = lb;
 	}
 
 	ArrayList<State> findCircles(int[][] boundary, State boundingState, int circleCount) {
@@ -155,11 +155,11 @@ class Finder {
 				// text(""+circleProbability, maxCoords[0], maxCoords[1]);
 				// noFill();
 
-				color globColor = m.average(maxCoords[0]-avgRadius, maxCoords[1]-avgRadius, maxCoords[0]+avgRadius, maxCoords[1]+avgRadius);
+				color globColor = lb.m.average(maxCoords[0]-avgRadius, maxCoords[1]-avgRadius, maxCoords[0]+avgRadius, maxCoords[1]+avgRadius);
 				PVector globPosition = new PVector(maxCoords[0], maxCoords[1]);
 				PVector globSize = new PVector(avgRadius*2, avgRadius*2);
 
-				State state = new State(globColor, globPosition, globSize);
+				State state = new State(globColor, globPosition, globSize, lb.frameTimestamp);
 				circles.add(state);
 			}
 			else {

@@ -12,22 +12,22 @@ class State {
 		this.sposition = new PVector();
 		this.ssize = new PVector();
 
-		timestamp = frameTimestamp;
+		this.timestamp = 0;
 	}
 
-	State(color c, PVector p, PVector s) {
+	State(color c, PVector p, PVector s, long timestamp) {
 		this.scolor = c;
 		this.sposition = p;
 		this.ssize = s;
 
-		timestamp = frameTimestamp;
+		this.timestamp = timestamp;
 	}
 
-	State(State s) {
+	State(State s, long timestamp) {
 		this.scolor = s.scolor;
 		this.sposition = s.sposition.get();
 		this.ssize = s.ssize.get();
 
-		timestamp = frameTimestamp;
+		this.timestamp = timestamp;
 	}
 };

@@ -3,8 +3,10 @@ class Renderer {
 
 	Animation duck;
 
-	Renderer(Balls balls) {
-		this.balls = balls;
+	LB lb;
+	Renderer(LB lb) {
+		this.lb = lb;
+		this.balls = lb.balls;
 	}
 
 	void init() {
@@ -19,13 +21,13 @@ class Renderer {
 		// scale(min(width/float(camResX), height/float(camResY)));
 		rotate(PI/2);
 		translate(0, -width);
-		scale(float(height)/float(camResX));
+		scale(float(height)/float(lb.camResX));
 
 		for (Ball ball : balls.balls) {
 			if(ball.ballProbability == 1){
 				for (State state : ball.stateHistory) {
 					if(!state.predicted){
-						float translation = 0.3*(frameTimestamp - state.timestamp);
+						float translation = 0.3*(lb.frameTimestamp - state.timestamp);
 						fill(red(state.scolor), green(state.scolor), blue(state.scolor));
 						float x = state.sposition.x;
 						float y = state.sposition.y+translation;
@@ -41,8 +43,8 @@ class Renderer {
 	void render() {
 		pushMatrix();
 
-		translate((width - height/float(camResY)*float(camResX))/2.0, 0);
-		scale(min(width/float(camResX), height/float(camResY)));
+		translate((width - height/float(lb.camResY)*float(lb.camResX))/2.0, 0);
+		scale(min(width/float(lb.camResX), height/float(lb.camResY)));
 
 		noStroke();
 		noFill();
@@ -89,7 +91,7 @@ class Renderer {
 				State state = ball.getState();
 				if(!state.predicted){
 					float r = sqrt(state.ssize.x*state.ssize.x + state.ssize.y*state.ssize.y);
-					duck.display((frameTimestamp-ball.timestamp)*1E-6, state.sposition.x, state.sposition.y, 2.5*r, 2.5*r);
+					duck.display((lb.frameTimestamp-ball.timestamp)*1E-6, state.sposition.x, state.sposition.y, 2.5*r, 2.5*r);
 				}
 			}
 		}

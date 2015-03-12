@@ -2,8 +2,6 @@ int ballCounter = 0;
 // míček / kandidát na míček
 class Ball {
 	ArrayList<State> stateHistory;
-	// počet zaznamenaných stavů
-	int historyLength = ballStateCount;
 	// jak moc jsme si jistí, že je toto opravdu míček?
 	float ballProbability = 0.5;
 	// počet posledních predikovaných stavů za sebou
@@ -21,9 +19,12 @@ class Ball {
 	// debug string se zobrazí nad míčkem v debug módu
 	String debugString = "";
 
-	Ball(State state) {
+	LB lb;
+	Ball(State state, LB lb) {
+		this.lb = lb;
+
 		id = ++ballCounter;
-		timestamp = frameTimestamp;
+		timestamp = lb.frameTimestamp;
 
 		stateHistory = new ArrayList<State>();
 		avgState = new State();
@@ -34,13 +35,13 @@ class Ball {
 
 	// přidá nový stav a odebere nejstarší
 	void addState(State state) {
-		if(stateHistory.size() == historyLength){
-			stateHistory.remove(historyLength-1);
+		if(stateHistory.size() == lb.ballStateCount){
+			stateHistory.remove(lb.ballStateCount-1);
 		}
 		stateHistory.add(0, state);
 
 		// zobrazí predikovaný stav při přidávání nového míčku, lze tím dobře srovnávat úspěšnost predikce
-		if(debug){
+		if(lb.debug){
 			stroke(255, 0, 255);
 			noFill();
 			ellipse(predictedState.sposition.x, predictedState.sposition.y, predictedState.ssize.x, predictedState.ssize.y);
@@ -54,7 +55,7 @@ class Ball {
 	void predict() {
 		predictedStates++;
 
-		State state = new State(predictedState);
+		State state = new State(predictedState, lb.frameTimestamp);
 		state.predicted = true;
 		addState(state);
 	}
@@ -101,9 +102,9 @@ class Ball {
 					// pokud máme 3 a více stavů, můžeme vypočítat rychlost a zrychlení
 					State state3 = getState(2); // předpředposlední stav
 
-					float t0 = (frameTimestamp - state1.timestamp)*1E-6;
-					float t1 = (state1.timestamp-state2.timestamp)*1E-6;
-					float t2 = (state2.timestamp-state3.timestamp)*1E-6;
+					float t0 = (lb.frameTimestamp- state1.timestamp)*1E-6;
+					float t1 = (state1.timestamp - state2.timestamp)*1E-6;
+					float t2 = (state2.timestamp - state3.timestamp)*1E-6;
 
 					// v1 - poslední rychlost míčku
 					PVector v1 = PVector.sub(state1.sposition, state2.sposition);
@@ -132,7 +133,7 @@ class Ball {
 					// |    |===================== poslední pozice
 					// |========================== nová pozice
 
-					float t0 = (frameTimestamp   - state1.timestamp)*1E-6;
+					float t0 = (lb.frameTimestamp- state1.timestamp)*1E-6;
 					float t1 = (state1.timestamp - state2.timestamp)*1E-6;
 					predictedState.sposition.set(state1.sposition);
 					predictedState.sposition.sub(state2.sposition);
@@ -156,7 +157,7 @@ class Ball {
 		float[] sumSize = new float[2];
 
 		// počítá z avgStateCount stavů nebo z méně
-		int count = min(stateHistory.size(), avgStateCount);
+		int count = min(stateHistory.size(), lb.avgStateCount);
 		
 		for (int i=0; i<count; i++) {
 			State state = stateHistory.get(i);
@@ -188,7 +189,7 @@ class Ball {
 	// vyhodnocuje, zda je tento Ball opravdu žonglérský míček
 	void updateProbability() {
 		// pokud jsme už jednou zjistili, že glob je míček, pak přestaneme pochybovat
-		if(ballProbability > ballProbabilityThreshold){
+		if(ballProbability > lb.ballProbabilityThreshold){
 			ballProbability = 1;
 		}
 		else {
@@ -214,27 +215,27 @@ class Ball {
 		float dr = red(state.scolor) - red(avgState.scolor);
 		float dg = green(state.scolor) - green(avgState.scolor);
 		float db = blue(state.scolor) - blue(avgState.scolor);
-		float dColor = (abs(dr) + abs(dg) + abs(db))/deltaTime;
-		float dColorPerc = constrain((dColorMax-dColor)/dColorMax*colorWeight, 0.0, colorWeight);
+		float dColor = (abs(dr) + abs(dg) + abs(db))/lb.deltaTime;
+		float dColorPerc = constrain((lb.dColorMax-dColor)/lb.dColorMax, 0.0, 1.0)*lb.colorWeight;
 
 		// vzdálenost od poslední pozice
 		State lastState = getState();
 		float dx = state.sposition.x - lastState.sposition.x;
 		float dy = state.sposition.y - lastState.sposition.y;
-		float dPosition = (dx*dx + dy*dy)/deltaTime;
-		float dPositionPerc = constrain((dPositionMax-dPosition)/dPositionMax*positionWeight, 0.0, positionWeight);
+		float dPosition = (dx*dx + dy*dy)/lb.deltaTime;
+		float dPositionPerc = constrain((lb.dPositionMax-dPosition)/lb.dPositionMax, 0.0, 1.0)*lb.positionWeight;
 
 		// vzdálenost od predikované pozice
 		dx = state.sposition.x - predictedState.sposition.x;
 		dy = state.sposition.y - predictedState.sposition.y;
-		float dPredictedPosition = (dx*dx + dy*dy)/deltaTime;
-		float dPredictedPositionPerc = constrain((dPredictedPositionMax-dPredictedPosition)/dPredictedPositionMax*predictedPositionWeight, 0.0, predictedPositionWeight);
+		float dPredictedPosition = (dx*dx + dy*dy)/lb.deltaTime;
+		float dPredictedPositionPerc = constrain((lb.dPredictedPositionMax-dPredictedPosition)/lb.dPredictedPositionMax, 0.0, 1.0)*lb.predictedPositionWeight;
 
 		// změna velikosti míčku
 		dx = state.ssize.x - avgState.ssize.x;
 		dy = state.ssize.y - avgState.ssize.y;
-		float dSize = (dx*dx + dy*dy)/deltaTime;
-		float dSizePerc = constrain((dSizeMax-dSize)/dSizeMax*sizeWeight, 0.0, sizeWeight);
+		float dSize = (dx*dx + dy*dy)/lb.deltaTime;
+		float dSizePerc = constrain((lb.dSizeMax-dSize)/lb.dSizeMax, 0.0, 1.0)*lb.sizeWeight;
 
 		debugString = round((dColorPerc)*100.0)/100.0 + "; max(" +round((dPositionPerc)*100.0)/100.0 + "," +round((dPredictedPositionPerc)*100.0)/100.0 + "); " +round((dSizePerc)*100.0)/100.0;
 
@@ -242,35 +243,33 @@ class Ball {
 	}
 
 	void render() {
-		if(debug){
-			State state = getState();
+		State state = getState();
 
-			noFill();
-			if(ballProbability == 1){
-				if(updated)
-					stroke(255, 255, 255);
-				else
-					stroke(255, 0, 0);
-			}
+		noFill();
+		if(ballProbability == 1){
+			if(updated)
+				stroke(255, 255, 255);
 			else
-				stroke(255, 255, 255, 128);
-			ellipse(state.sposition.x, state.sposition.y, state.ssize.x, state.ssize.y);
-			noStroke();
-
-			// pokud není žonglérský míček, nezobrazí se id ani debug string
-			if(ballProbability < 1)
-				return;
-
-			// zobrazení debug string
-			textAlign(CENTER, BOTTOM);
-			fill(255,255,255);
-			textSize(12);
-			text(debugString, state.sposition.x, state.sposition.y-state.ssize.y/2);
-			textAlign(CENTER, CENTER);
-			// zobrazení id
-			fill(255, 255, 255);
-			textSize(28);
-			text(""+id, state.sposition.x, state.sposition.y);
+				stroke(255, 0, 0);
 		}
+		else
+			stroke(255, 255, 255, 128);
+		ellipse(state.sposition.x, state.sposition.y, state.ssize.x, state.ssize.y);
+		noStroke();
+
+		// pokud není žonglérský míček, nezobrazí se id ani debug string
+		if(ballProbability < 1)
+			return;
+
+		// zobrazení debug string
+		textAlign(CENTER, BOTTOM);
+		fill(255,255,255);
+		textSize(12);
+		text(debugString, state.sposition.x, state.sposition.y-state.ssize.y/2);
+		textAlign(CENTER, CENTER);
+		// zobrazení id
+		fill(255, 255, 255);
+		textSize(28);
+		text(""+id, state.sposition.x, state.sposition.y);
 	}
 };

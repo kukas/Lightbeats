@@ -6,10 +6,13 @@ class Balls {
 
 	Finder finder;
 
-	Balls() {
+	LB lb;
+	Balls(LB lb) {
+		this.lb = lb;
+
 		balls = new ArrayList<Ball>();
 
-		finder = new Finder();
+		finder = new Finder(lb);
 	}
 
 	void adapt() {
@@ -45,11 +48,11 @@ class Balls {
 				continue;
 			}
 
-			color globColor = m.average(glob[0], glob[1], glob[0] + glob[2], glob[1] + glob[3]);
+			color globColor = lb.m.average(glob[0], glob[1], glob[0] + glob[2], glob[1] + glob[3]);
 			PVector globPosition = new PVector(glob[0]+glob[2]/2, glob[1]+glob[3]/2);
 			PVector globSize = new PVector(glob[2], glob[3]);
 
-			State state = new State(globColor, globPosition, globSize);
+			State state = new State(globColor, globPosition, globSize, lb.frameTimestamp);
 			state.globId = i;
 			states.add(state);
 		}
@@ -87,7 +90,7 @@ class Balls {
 					}
 				}
 
-				if(debug){
+				if(lb.debug){
 					fill(255,255,255);
 					textSize(30);
 					textAlign(LEFT, TOP);
@@ -99,7 +102,7 @@ class Balls {
 				if(circleCount > 0){
 					int[][] boundary = globPixels[state.globId];
 					ArrayList<State> circles = finder.findCircles(boundary, state, circleCount);
-					if(debug){
+					if(lb.debug){
 						strokeWeight(3);
 						noFill();
 						for (int j=0; j<circles.size(); j++) {
@@ -197,7 +200,7 @@ class Balls {
 	}
 
 	void addBall(State state) {
-		balls.add(new Ball(state));
+		balls.add(new Ball(state, lb));
 	}
 
 	void render() {
@@ -205,11 +208,9 @@ class Balls {
 			ball.render();
 		}
 
-		if(debug){
-			fill(255,255,255);
-			textSize(16);
-			textAlign(LEFT, TOP);
-			text(debugString, 0, 0);
-		}
+		fill(255,255,255);
+		textSize(16);
+		textAlign(LEFT, TOP);
+		text(debugString, 0, 0);
 	}
 };
