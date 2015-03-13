@@ -69,8 +69,10 @@ class Renderer {
 					}
 					else if(scene == 2){
 						float dt = (lb.frameTimestamp-state.timestamp)*1E-6;
-						float acceleration = 0.00005;
-						image(deadBird, state.sposition.x, state.sposition.y+dt*dt*acceleration, r, r/deadBird.width*deadBird.height);
+						float acceleration = 0.00002;
+						float ysize = r/deadBird.width*deadBird.height;
+						float ypos = min(state.sposition.y+dt*dt*acceleration, lb.camResY-ysize/2);
+						image(deadBird, state.sposition.x, ypos, r, ysize);
 					}
 					imageMode(CORNER);
 				}
