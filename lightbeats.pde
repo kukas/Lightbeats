@@ -38,6 +38,8 @@ class LB {
 	int avgStateCount = 7;
 
 	// glob detection
+	float maxProbabilityThreshold = 0.7;
+	float minProbabilityThreshold = 0.3;
 	// - probability weights
 	float colorWeight = 0.3;
 	float positionWeight = 0.5;
@@ -123,6 +125,19 @@ class LB {
 		cp5.addSlider("debugView", 0, 1, debugView, 10, 130, 128, 15)
 			.setNumberOfTickMarks(2)
 			.plugTo(this);
+
+		cp5.addSlider("colorWeight", 0, 1, colorWeight, 10, 170, 128, 15).plugTo(this);
+		cp5.addSlider("positionWeight", 0, 1, positionWeight, 10, 190, 128, 15).plugTo(this);
+		cp5.addSlider("predictedPositionWeight", 0, 1, predictedPositionWeight, 10, 210, 128, 15).plugTo(this);
+		cp5.addSlider("sizeWeight", 0, 1, sizeWeight, 10, 230, 128, 15).plugTo(this);
+
+		cp5.addSlider("dColorMax", 1, 100, dColorMax, 10, 250, 128, 15).plugTo(this);
+		cp5.addSlider("dPositionMax", 1, 300, dPositionMax, 10, 270, 128, 15).plugTo(this);
+		cp5.addSlider("dPredictedPositionMax", 1, 300, dPredictedPositionMax, 10, 290, 128, 15).plugTo(this);
+		cp5.addSlider("dSizeMax", 1, 300, dSizeMax, 10, 310, 128, 15).plugTo(this);
+
+		cp5.addSlider("probabilityThreshold", 0, 1, probabilityThreshold, 10, 340, 128, 15).plugTo(this);
+
 		if(!debug)
 			cp5.hide();
 
