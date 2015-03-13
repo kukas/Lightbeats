@@ -62,7 +62,7 @@ class OldTrackingAct extends Act {
 	void keyPressed() {
 		switch(keyCode){
 			case RIGHT:
-				parent.next();
+				next();
 				break;
 			case LEFT:
 				parent.prev();

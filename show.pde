@@ -45,6 +45,10 @@ class Show {
 		act().keyPressed();
 	}
 
+	void mousePressed() {
+		act().mousePressed();
+	}
+
 	void stop() {
 		act().hide();
 	}

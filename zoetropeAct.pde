@@ -60,18 +60,11 @@ class ZoetropeAct extends Act {
 		imageMode(CORNER); //revert back to corner image mode
 	}
 
-	void keyPressed() {
-		switch(keyCode){
-			case RIGHT:
-				scene++;
-				if(scene == 1)
-					animationTimestamp = millis();
-				if(scene >= 2)
-					parent.next();
-				break;
-			case LEFT:
-				parent.prev();
-				break;
-		}
+	void next() {
+		scene++;
+		if(scene == 1)
+			animationTimestamp = millis();
+		if(scene >= 2)
+			parent.next();
 	}
 };

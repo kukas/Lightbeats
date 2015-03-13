@@ -67,6 +67,10 @@ void keyPressed() {
 	}
 }
 
+void mousePressed() {
+	show.mousePressed();
+}
+
 public void stop() {
 	show.stop();
 	super.stop();

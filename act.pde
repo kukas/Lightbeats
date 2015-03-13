@@ -21,11 +21,19 @@ class Act {
 	void keyPressed() {
 		switch(keyCode){
 			case RIGHT:
-				parent.next();
+				next();
 				break;
 			case LEFT:
 				parent.prev();
 				break;
 		}
+	}
+
+	void next() {
+		parent.next();
+	}
+
+	void mousePressed() {
+		next();
 	}
 }

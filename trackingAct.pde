@@ -304,17 +304,21 @@ class TrackingAct extends Act {
 		lightbeats.keyPressed();
 		switch(keyCode){
 			case RIGHT:
-				scene++;
-				if(scene == 2){
-					shotgun.rewind();
-					shotgun.play();
-				}
-				if(scene >= 3)
-					parent.next();
+				next();
 				break;
 			case LEFT:
 				parent.prev();
 				break;
 		}
+	}
+
+	void next() {
+		scene++;
+		if(scene == 2){
+			shotgun.rewind();
+			shotgun.play();
+		}
+		if(scene >= 3)
+			parent.next();
 	}
 };
