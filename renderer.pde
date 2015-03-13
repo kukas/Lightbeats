@@ -58,14 +58,15 @@ class Renderer {
 				if(ball.stateHistory.size() < 2)
 					continue;
 				State state = ball.getState();
+				State avgState = ball.avgState;
 				if(!state.predicted){
-					float r = sqrt(state.ssize.x*state.ssize.x + state.ssize.y*state.ssize.y) * 2.5;
+					float r = sqrt(avgState.ssize.x*avgState.ssize.x + avgState.ssize.y*avgState.ssize.y) * 2.5;
 					imageMode(CENTER);
 					if(scene == 0){
 						image(sittingBird, state.sposition.x, state.sposition.y, r, r/sittingBird.width*sittingBird.height);
 					}
 					else if(scene == 1){
-						duck.display((lb.frameTimestamp-ball.timestamp)*1E-6, state.sposition.x, state.sposition.y, r, r);
+						duck.display((lb.frameTimestamp-ball.timestamp)*1E-6, state.sposition.x, state.sposition.y, r*2, r*2);
 					}
 					else if(scene == 2){
 						float dt = (lb.frameTimestamp-state.timestamp)*1E-6;
