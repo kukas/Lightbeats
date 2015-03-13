@@ -13,8 +13,8 @@ class Myron {
 	int height;
 	int pixelCount;
 	// camera settings (CL-Eye only)
-	float gain = 0;
-	float exposure = 0.6;
+	float gain = 0.3;
+	float exposure = 0.0;
 
 	// image processing
 	// - settings
