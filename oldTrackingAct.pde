@@ -1,6 +1,5 @@
-import JMyron.*;
 class OldTrackingAct extends Act {
-	JMyron m; //a camera object
+	Myron m; //a camera object
 	PImage saved; 
 	PImage destination; 
 	int numPixels;
@@ -10,8 +9,13 @@ class OldTrackingAct extends Act {
 
 	color transparentColor = color(0,0,0,0);
 
+	PApplet papplet;
+	OldTrackingAct(PApplet papplet) {
+		this.papplet = papplet;
+	}
+
 	void init() {
-		m = new JMyron();//make a new instance of the object
+		m = new Myron(papplet);//make a new instance of the object
 
 		numPixels = 640 * 480;
 		program = -3; //controlling speed along x axis, on start stay static until UP or DOWN arrow keys are pressed
@@ -22,14 +26,14 @@ class OldTrackingAct extends Act {
 	}
 
 	void show() {
-		m.start(640, 480);//start a capture  
-		m.findGlobs(0);//disable the intelligence to speed up frame rate
+		m.start(CLCamera.CLEYE_VGA, 60);//start a capture  
+		m.findGlobs(false);//disable the intelligence to speed up frame rate
 	}
 
 	void draw() {
 		m.update(); //update the camera view
 
-		int[] img = m.image(); //get the normal image of the camera   
+		int[] img = m.cameraImage(); //get the normal image of the camera   
 		// destination.loadPixels();
 		for(int i=0; i<numPixels; i++){ //loop through all the pixels
 			pixelBrightness = brightness(img[i]);
@@ -49,7 +53,7 @@ class OldTrackingAct extends Act {
 		scale(height/640.0); // scale it so it takes up whole height
 		rotate(PI/2); //so we make use of wider field of view (width is bigger than height)
 		translate(0, -1067); //+ we will have more space for moving image along x-axis if the actual camera image is placed on the right edge.
-		image(destination, 0, 0); //display current frame offset in x-axis for y offset (rotated image)
+		image(destination, 0, 0, 640, 10); //display current frame offset in x-axis for y offset (rotated image)
 		popMatrix();
 
 		saved = get();
@@ -66,10 +70,6 @@ class OldTrackingAct extends Act {
 				break;
 			case LEFT:
 				parent.prev();
-				break;
-
-			case 'E':
-				m.settings();
 				break;
 			case 'W':
 				program--;

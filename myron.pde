@@ -14,12 +14,13 @@ class Myron {
 	int pixelCount;
 	// camera settings (CL-Eye only)
 	float gain = 0.3;
-	float exposure = 0.0;
+	float exposure = 0.5;
 
 	// image processing
 	// - settings
 	float threshold = 130;
 	int minDensity = 50;
+	boolean process = true;
 
 	boolean[] globPixels;
 	int[] globIDs;
@@ -109,7 +110,7 @@ class Myron {
 
 		cam.setCameraParam(CLCamera.CLEYE_AUTO_GAIN, 0);
 		cam.setCameraParam(CLCamera.CLEYE_AUTO_EXPOSURE, 0);
-		cam.setCameraParam(CLCamera.CLEYE_AUTO_WHITEBALANCE, 1);
+		cam.setCameraParam(CLCamera.CLEYE_AUTO_WHITEBALANCE, 0);
 
 		setGain(gain);
 		setExposure(exposure);
@@ -151,6 +152,10 @@ class Myron {
 		minDensity = value;
 	}
 
+	void findGlobs(boolean find) {
+		process = find;
+	}
+
 	void debugPixels(int[] p) {
 		img.pixels = p;
 		img.updatePixels();
@@ -173,8 +178,14 @@ class Myron {
 			camPixels = m.image();
 		}
 
-		thresholdFilter();
-		processGlobs();
+		if(process){
+			thresholdFilter();
+			processGlobs();
+		}
+	}
+
+	int[] cameraImage() {
+		return camPixels;
 	}
 
 	void thresholdFilter() {

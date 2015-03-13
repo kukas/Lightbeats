@@ -25,7 +25,7 @@ void setup(){
 	// SCÉNÁŘ --------------------------------------------------
 	// film countdown
 	show.addAct(new CountdownAct());
-	// slides
+	// // slides
 	for (int i=0;i<13;i++){
 		SlideshowAct slide = new SlideshowAct(i+".jpg");
 		show.addAct(slide);
@@ -34,7 +34,7 @@ void setup(){
 	}
 	// tracking
 	show.addAct(new TrackingAct(this));
-	show.addAct(new OldTrackingAct());
+	show.addAct(new OldTrackingAct(this));
 	show.addAct(new ZoetropeAct("zoetrope.jpg"));
 	// horse animation
 	HorseSlideshowAct act = new HorseSlideshowAct("milimetr_res.png");
@@ -68,7 +68,8 @@ void keyPressed() {
 }
 
 void mousePressed() {
-	show.mousePressed();
+	if (mouseButton == RIGHT)
+		show.mousePressed();
 }
 
 public void stop() {
