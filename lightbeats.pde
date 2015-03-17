@@ -4,55 +4,56 @@
  * Creative commons license BY-NC-SA Attribution-NonCommercial-ShareAlike for more information see: http://creativecommons.org/licenses/by-nc-sa/4.0/
  * Creative commons licence BY-NC-SA Uveďte autora-Neužívejte dílo komerčně-Zachovejte licenci 
  * the author disclaims all warranties with regard to this software including all implied warranties of merchantability and fitness. in no event shall the author be liable for any special, direct, indirect, or consequential damages or any damages whatsoever resulting from loss of use, data or profits, whether in an action of contract, negligence or other tortious action, arising out of or in connection with the use or performance of this software. 
- 
- * Make a brightness treshold,
- * than buffer previous frames and animate them translated negatively on x axis. 
- * Visualization represent graphical juggling notation diagrams used by jugglers and known as siteswaps.
- * dependencies: Jmyron processing library, processing 2.2.1, webcam (originally designed for PS3eye)
- 
- *Use arrows UP, DOWN for controlling speed of movement along x-axis 
- *Use arrows LEFT, RIGHT to controll the brightness treshold
- *Spacebar will save snapshot to the sketch folder
- *by clicking on running sketch the camera settings should appear
  */
 
 import controlP5.*;
-//---------------------------------------------------------------
 class LB {
-	// GLOBAL SETTINGS
+	// --------- GLOBAL SETTINGS ---------
 	// camera
 	int camResX = 640;
 	int camResY = 480;
 	int camRate = 75;
-
-	// myron
-	float threshold = 130;
 
 	// dev
 	boolean debug = true;
 	int debugView = 0;
 	boolean capture = false;
 
-	// view
+	// threshold filter
+	float threshold = 130;
+	
+	// state storage
 	int ballStateCount = 10;
 	int avgStateCount = 7;
 
-	// glob detection
-	float maxProbabilityThreshold = 0.7;
-	float minProbabilityThreshold = 0.3;
+	// ball detection
+	float existingBallThreshold = 0.7;
+	float newBallThreshold = 0.3;
 	// - probability weights
 	float colorWeight = 0.3;
 	float positionWeight = 0.5;
 	float predictedPositionWeight = 0.5;
 	float sizeWeight = 0.4;
-	// - maximal values
+	// - maximal delta values
 	float dColorMax = 8;
 	float dPositionMax = pow(11, 2);
 	float dPredictedPositionMax = pow(8, 2);
 	float dSizeMax = pow(5, 2);
+	
+	// finder
+	float finderThreshold = 0.7;
+	float initialCircleProbability = 0.15;
+	float minFoundCircleRatio = 1.5;
+	int minPointCount = 40;
 
-	// ball detection
+	// ball path prediction
+	int maxPredictedStates = 3;
+
+	// ball probability
 	float ballProbabilityThreshold = 0.2; // po jaké hodnotě se glob považuje za míček
+	float ballProbabilitySpeedSq = 100;
+
+	// --------- /GLOBAL SETTINGS ---------
 
 	Myron m;
 	int[][] globArray;
@@ -71,14 +72,13 @@ class LB {
 	Renderer renderer;
 
 	PApplet parent;
-	//-----------------------------------------------------------------------------------------------------------
+
 	LB(PApplet parent) {
 		this.parent = parent;
 	}
-	//SETUP
+
 	void setup() {
 		setupTimestamp = System.nanoTime();
-		println("oiareja");
 		m = new Myron(parent);
 		if(! m.start(CLCamera.CLEYE_VGA, camRate) ) // 640x480, 60fps
 			exit();
@@ -86,57 +86,75 @@ class LB {
 		m.threshold(threshold);
 
 		cp5 = new ControlP5(parent);
+		cp5.getTab("default").setLabel("camera settings");
+		cp5.addTab("ball detection");
+		cp5.addTab("circle finder");
+		cp5.addTab("other");
 
-		if(m.usingCL){
-			float gain = m.getGain();
-			cp5.addSlider("gain")
-				.setPosition(10, 10)
-				.setSize(128, 15)
-				.setRange(0, 100)
-				.setValue(gain*100)
-				.plugTo(this);
-
-			float exposure = m.getExposure();
-			cp5.addSlider("exposure")
-				.setPosition(10, 40)
-				.setSize(128, 15)
-				.setRange(0, 100)
-				.setValue(exposure*100)
-				.plugTo(this);
-		}
-		else {
-			cp5.addButton("cameraSettings")
-				.setPosition(10, 10)
-				.setSize(128, 15)
-				.plugTo(this);
-		}
-
-		cp5.addSlider("brightnessThreshold", 0, 255, threshold, 10, 70, 128, 15)
-			.setNumberOfTickMarks(256)
-			.plugTo(this);
-		int globSize = m.getMinDensity();
-		cp5.addSlider("minGlobSize")
-			.setPosition(10, 100)
-			.setSize(128, 15)
-			.setRange(0, 200)
-			.setValue(globSize)
-			.plugTo(this);
-
-		cp5.addSlider("debugView", 0, 1, debugView, 10, 130, 128, 15)
+		// debug
+		cp5.addSlider("debugView", 0, 1, debugView, 10, 20, 128, 15)
+			.moveTo("global")
 			.setNumberOfTickMarks(2)
 			.plugTo(this);
 
-		cp5.addSlider("colorWeight", 0, 1, colorWeight, 10, 170, 128, 15).plugTo(this);
-		cp5.addSlider("positionWeight", 0, 1, positionWeight, 10, 190, 128, 15).plugTo(this);
-		cp5.addSlider("predictedPositionWeight", 0, 1, predictedPositionWeight, 10, 210, 128, 15).plugTo(this);
-		cp5.addSlider("sizeWeight", 0, 1, sizeWeight, 10, 230, 128, 15).plugTo(this);
+		// camera gui
+		if(m.usingCL){
+			cp5.addTextlabel("label1").setPosition(10, 38).setText("CL Eye settings");
+			float gain = m.getGain();
+			cp5.addSlider("gain", 0, 100, gain*100, 10, 50, 128, 15).plugTo(this);
 
-		cp5.addSlider("dColorMax", 1, 100, dColorMax, 10, 250, 128, 15).plugTo(this);
-		cp5.addSlider("dPositionMax", 1, 300, dPositionMax, 10, 270, 128, 15).plugTo(this);
-		cp5.addSlider("dPredictedPositionMax", 1, 300, dPredictedPositionMax, 10, 290, 128, 15).plugTo(this);
-		cp5.addSlider("dSizeMax", 1, 300, dSizeMax, 10, 310, 128, 15).plugTo(this);
+			float exposure = m.getExposure();
+			cp5.addSlider("exposure", 0, 100, exposure*100, 10, 70, 128, 15).plugTo(this);
+		}
+		else {
+			cp5.addTextlabel("label1").setPosition(10, 38).setText("JMyron settings");
+			cp5.addButton("cameraSettings", 0, 10, 50, 128, 15).plugTo(this);
+		}
 
-		cp5.addSlider("probabilityThreshold", 0, 1, probabilityThreshold, 10, 340, 128, 15).plugTo(this);
+		// threshold filter
+		cp5.addTextlabel("labelthreshold").setPosition(10, 88).setText("Glob finder");
+		cp5.addSlider("brightnessThreshold", 0, 255, threshold, 10, 100, 128, 15)
+			.setNumberOfTickMarks(256)
+			.plugTo(this);
+
+		// glob finding
+		int globSize = m.getMinDensity();
+		cp5.addSlider("minGlobSize", 0, 512, globSize, 10, 120, 128, 15).plugTo(this);
+		
+		cp5.addTextlabel("label2").setPosition(10, 38).setText("Ball state storage").moveTo("ball detection");
+		cp5.addSlider("ballStateCount", 0, 32, ballStateCount, 10, 50, 128, 15).plugTo(this).moveTo("ball detection");
+		cp5.addSlider("avgStateCount", 0, 32, avgStateCount, 10, 70, 128, 15).plugTo(this).moveTo("ball detection");
+
+		cp5.addTextlabel("label3").setPosition(10, 88).setText("Ball detection thresholds").moveTo("ball detection");
+		cp5.addSlider("existingBallThreshold", 0, 1, existingBallThreshold, 10, 100, 128, 15).plugTo(this).moveTo("ball detection");
+		cp5.addSlider("newBallThreshold", 0, 1, newBallThreshold, 10, 120, 128, 15).plugTo(this).moveTo("ball detection");
+
+		cp5.addTextlabel("label6").setPosition(10, 138).setText("Ball identification").moveTo("ball detection");
+		cp5.addSlider("colorWeight", 0, 1, colorWeight, 10, 150, 128, 15).plugTo(this).moveTo("ball detection");
+		cp5.addSlider("positionWeight", 0, 1, positionWeight, 10, 170, 128, 15).plugTo(this).moveTo("ball detection");
+		cp5.addSlider("predictedPositionWeight", 0, 1, predictedPositionWeight, 10, 190, 128, 15).plugTo(this).moveTo("ball detection");
+		cp5.addSlider("sizeWeight", 0, 1, sizeWeight, 10, 210, 128, 15).plugTo(this).moveTo("ball detection");
+
+		cp5.addSlider("dColorMax", 1, 100, dColorMax, 10, 230, 128, 15).plugTo(this).moveTo("ball detection");
+		cp5.addSlider("dPositionMax", 1, 300, dPositionMax, 10, 250, 128, 15).plugTo(this).moveTo("ball detection");
+		cp5.addSlider("dPredictedPositionMax", 1, 300, dPredictedPositionMax, 10, 270, 128, 15).plugTo(this).moveTo("ball detection");
+		cp5.addSlider("dSizeMax", 1, 300, dSizeMax, 10, 290, 128, 15).plugTo(this).moveTo("ball detection");
+		
+		cp5.addTextlabel("label4").setPosition(10, 38).setText("Ball prediction and probability").moveTo("other");
+		cp5.addSlider("maxPredictedStates", 0, 30, maxPredictedStates, 10, 50, 128, 15).plugTo(this).moveTo("other");
+		cp5.addSlider("ballProbabilityThreshold", 0, 1, ballProbabilityThreshold, 10, 70, 128, 15).plugTo(this).moveTo("other");
+		cp5.addSlider("ballProbabilitySpeed", 0, 128, sqrt(ballProbabilitySpeedSq), 10, 90, 128, 15).plugTo(this).moveTo("other");
+
+		cp5.addTextlabel("label5").setPosition(10, 38).setText("Circle finder").moveTo("circle finder");
+		cp5.addSlider("finderThreshold", 0, 1, finderThreshold, 10, 50, 128, 15).plugTo(this).moveTo("circle finder");
+		cp5.addSlider("initialCircleProbability", 0, 1, initialCircleProbability, 10, 70, 128, 15).plugTo(this).moveTo("circle finder");
+		cp5.addSlider("minFoundCircleRatio", 0, 16, minFoundCircleRatio, 10, 90, 128, 15).plugTo(this).moveTo("circle finder");
+		cp5.addSlider("minPointCount", 0, 100, minPointCount, 10, 110, 128, 15).plugTo(this).moveTo("circle finder");
+	// 	// finder
+	// float finderThreshold = 0.7;
+	// float initialCircleProbability = 0.15;
+	// float minFoundCircleRatio = 1.5;
+	// int minPointCount = 40;
 
 		if(!debug)
 			cp5.hide();
@@ -146,9 +164,6 @@ class LB {
 
 		renderer.init();
 	}
-
-	//-----------------------------------------------------------------------------------------------------------
-	//DRAW
 
 	void draw() {
 		m.update();
@@ -187,6 +202,7 @@ class LB {
 				stroke(255, 0, 0);
 				textAlign(LEFT, BOTTOM);
 				text(i, globBox[0], globBox[1]);
+				noFill();
 				rect(globBox[0], globBox[1], globBox[2], globBox[3]);
 			}
 		}
@@ -222,8 +238,7 @@ class LB {
 
 	}
 
-	//-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	//User input - calibrating camera and animation
+	// User input - calibrating camera and animation
 		
 	void brightnessThreshold(float t) {
 		threshold = t;
@@ -247,8 +262,10 @@ class LB {
 		m.setMinDensity((int) value);
 	}
 
-	//by pressing arrow key up and down you animate movement of previous frames along x axis 
-	//(originally designed to flow in the left direction-UP arrow key or stay static - program value is 0)
+	void ballProbabilitySpeed(float value) {
+		ballProbabilitySpeedSq = value*value;
+	}
+
 	void keyPressed() {
 		switch(keyCode) {
 			case ' ': 
@@ -289,8 +306,8 @@ boolean sketchFullScreen() {
 }
 LB lightbeats;
 void setup() {
-	// size(camResX, camResY);
-	size(displayWidth, displayHeight);
+	size(640, 480);
+	// size(displayWidth, displayHeight);
 	frameRate(-1);
 
 	lightbeats = new LB(this);

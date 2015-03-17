@@ -197,7 +197,7 @@ class Ball {
 				State state = getState();
 				float avgDiff = PVector.sub(avgState.sposition, state.sposition).magSq();
 				// pokud se hýbe víc než 10px/frame
-				float minAvgDiff = 100;
+				float minAvgDiff = lb.ballProbabilitySpeedSq;
 				ballProbability = ballProbability + (constrain(avgDiff/minAvgDiff, 0.0, 1.0) - ballProbability)*0.2;
 			}
 		}

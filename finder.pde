@@ -21,7 +21,7 @@ class Finder {
 
 		ArrayList<State> circles = new ArrayList<State>();
 
-		float lastCircleProbability = 0.15;
+		float lastCircleProbability = lb.initialCircleProbability;
 		int maxCircles = circleCount;
 		while(maxCircles-- > 0){
 			int[][] histogram = new int[size][size];
@@ -150,7 +150,7 @@ class Finder {
 
 			float circleProbability = maxValue*maxRadiusValue/float(votes) * (pointCount - newPointCount)/pointCount;
 
-			if(lastCircleProbability/circleProbability < 1.5){
+			if(lastCircleProbability/circleProbability < lb.minFoundCircleRatio){
 				// fill(0, 255, 0, 200);
 				// text(""+circleProbability, maxCoords[0], maxCoords[1]);
 				// noFill();
@@ -172,7 +172,7 @@ class Finder {
 
 			lastCircleProbability = circleProbability;
 
-			if(newPointCount < 40)
+			if(newPointCount < lb.minPointCount)
 				break;
 
 			int[][] newBoundary = new int[newPointCount][2];

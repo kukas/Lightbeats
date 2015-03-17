@@ -82,7 +82,7 @@ class Balls {
 
 				int circleCount = 0;
 				for (float probability : probabilities) {
-					if(probability > 0.7 && circleCount < 2){
+					if(probability > lb.finderThreshold && circleCount < 2){
 						circleCount++;
 					}
 					else {
@@ -153,17 +153,23 @@ class Balls {
 				}
 
 				// známý míček
-				if(probabilities[0] > 0.7){
+				if(probabilities[0] > lb.existingBallThreshold){
 					Ball ball = ballsProbabilities.get(probabilities[0]);
 					ball.updateBall(state);
 					states.remove(state);
 					continue;
 				}
 				// nový míček!
-				if(probabilities[0] < 0.4){
+				if(probabilities[0] < lb.newBallThreshold){
 					addBall(state);
 					states.remove(state);
 					continue;
+				}
+
+				// aktualizuje debugstring pro nejlepší míček
+				if(lb.debug){
+					Ball ball = ballsProbabilities.get(probabilities[0]);
+					ball.getProbability(state);
 				}
 
 				// ostatní případy jsou sporné a chce se mi z nich plakat
@@ -183,7 +189,7 @@ class Balls {
 			// projde všechny míčky, ke kterým nebyl nalezen glob
 			if(!ball.updated){
 				// několik stavů si míček dopočítá
-				if(ball.predictedStates < 3){
+				if(ball.predictedStates < lb.maxPredictedStates){
 					ball.predict();
 				}
 				// pokud počet dopočítaných stavů překročí hranici
