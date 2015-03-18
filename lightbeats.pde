@@ -92,9 +92,12 @@ class LB {
 		cp5.addTab("other");
 
 		// debug
-		cp5.addSlider("debugView", 0, 1, debugView, 10, 20, 128, 15)
+		// debugView 0 = camera image + balls + prediction
+		// debugView 1 = globs image + glob bounding boxes + glob boundaries
+		// debugView 2 = globs image + circle finder debug
+		cp5.addSlider("debugView", 0, 2, debugView, 10, 20, 128, 15)
 			.moveTo("global")
-			.setNumberOfTickMarks(2)
+			.setNumberOfTickMarks(3)
 			.plugTo(this);
 
 		// camera gui
@@ -113,7 +116,7 @@ class LB {
 
 		// threshold filter
 		cp5.addTextlabel("labelthreshold").setPosition(10, 88).setText("Glob finder");
-		cp5.addSlider("brightnessThreshold", 0, 255, threshold, 10, 100, 128, 15)
+		cp5.addSlider("brightnessThreshold", 0, 1024, threshold, 10, 100, 128, 15)
 			.setNumberOfTickMarks(256)
 			.plugTo(this);
 
@@ -149,12 +152,7 @@ class LB {
 		cp5.addSlider("finderThreshold", 0, 1, finderThreshold, 10, 50, 128, 15).plugTo(this).moveTo("circle finder");
 		cp5.addSlider("initialCircleProbability", 0, 1, initialCircleProbability, 10, 70, 128, 15).plugTo(this).moveTo("circle finder");
 		cp5.addSlider("minFoundCircleRatio", 0, 16, minFoundCircleRatio, 10, 90, 128, 15).plugTo(this).moveTo("circle finder");
-		cp5.addSlider("minPointCount", 0, 100, minPointCount, 10, 110, 128, 15).plugTo(this).moveTo("circle finder");
-	// 	// finder
-	// float finderThreshold = 0.7;
-	// float initialCircleProbability = 0.15;
-	// float minFoundCircleRatio = 1.5;
-	// int minPointCount = 40;
+		cp5.addSlider("minPointCount", 3, 100, minPointCount, 10, 110, 128, 15).plugTo(this).moveTo("circle finder");
 
 		if(!debug)
 			cp5.hide();
@@ -178,38 +176,40 @@ class LB {
 		globPixels = m.globEdgePoints();
 		if(debug){
 			// Zobrazí obrázek z webkamery
-			if(debugView == 0)
+			if(debugView == 0){
 				m.debugPixels(m.camPixels);
-			if(debugView == 1)
+			}
+			if(debugView == 1){
 				m.debugPixels(m.globPixels);
+				for(int i=0;i<globArray.length;i++){
+					int[][] boundary = globPixels[i];
+					int[] globBox = globArray[i];
 
-			for(int i=0;i<globArray.length;i++){
-				int[][] boundary = globPixels[i];
-				int[] globBox = globArray[i];
-
-				boolean inside = false;
-				for (int j = i-1; j >= 0; j--) { // zneužívá se tady toho, že pokud glob bude v jiném globu, ten glob je před ním
-					int[] glob2 = globArray[j];
-					if(glob2[0] < globBox[0] && glob2[1] < globBox[1] && glob2[0]+glob2[2] > globBox[0]+globBox[2] && glob2[1]+glob2[3] > globBox[1]+globBox[3]){
-						inside = true;
-						break;
+					boolean inside = false;
+					for (int j = i-1; j >= 0; j--) { // zneužívá se tady toho, že pokud glob bude v jiném globu, ten glob je před ním
+						int[] glob2 = globArray[j];
+						if(glob2[0] < globBox[0] && glob2[1] < globBox[1] && glob2[0]+glob2[2] > globBox[0]+globBox[2] && glob2[1]+glob2[3] > globBox[1]+globBox[3]){
+							inside = true;
+							break;
+						}
 					}
-				}
-				if(inside){
-					continue;
-				}
+					if(inside){
+						continue;
+					}
 
-				stroke(255, 0, 0);
-				textAlign(LEFT, BOTTOM);
-				text(i, globBox[0], globBox[1]);
-				noFill();
-				rect(globBox[0], globBox[1], globBox[2], globBox[3]);
+					fill(255, 255, 0);
+					textAlign(LEFT, BOTTOM);
+					text(i, globBox[0], globBox[1]);
+					stroke(255, 0, 0);
+					noFill();
+					rect(globBox[0], globBox[1], globBox[2], globBox[3]);
+				}
 			}
 		}
 
 		balls.processGlobs(globArray, globPixels);
 
-		if(debug){
+		if(debug && debugView != 1){
 			balls.render();
 		}
 

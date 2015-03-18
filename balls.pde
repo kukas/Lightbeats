@@ -90,28 +90,10 @@ class Balls {
 					}
 				}
 
-				if(lb.debug){
-					fill(255,255,255);
-					textSize(30);
-					textAlign(LEFT, TOP);
-					text(""+circleCount, state.sposition.x, state.sposition.y);
-					textSize(12);
-				}
-
 				// if(circleCount > 0 && state.globId != null){
 				if(circleCount > 0){
 					int[][] boundary = globPixels[state.globId];
 					ArrayList<State> circles = finder.findCircles(boundary, state, circleCount);
-					if(lb.debug){
-						strokeWeight(3);
-						noFill();
-						for (int j=0; j<circles.size(); j++) {
-							State circle = circles.get(j);
-							stroke(j*255, 255, 0, 128);
-							ellipse(circle.sposition.x, circle.sposition.y, circle.ssize.x, circle.ssize.y);
-						}
-						strokeWeight(1);
-					}
 
 					if(circles.size() == 1){
 						Ball bestBall = ballsProbabilities.get(probabilities[0]);
@@ -210,13 +192,15 @@ class Balls {
 	}
 
 	void render() {
-		for (Ball ball : balls) {
-			ball.render();
-		}
+		if(lb.debugView != 2){
+			for (Ball ball : balls) {
+				ball.render();
+			}
 
-		fill(255,255,255);
-		textSize(16);
-		textAlign(LEFT, TOP);
-		text(debugString, 0, 0);
+			fill(255,255,255);
+			textSize(16);
+			textAlign(LEFT, TOP);
+			text(debugString, 0, 0);
+		}
 	}
 };
