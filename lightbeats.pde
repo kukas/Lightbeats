@@ -82,7 +82,9 @@ class LB {
 		m = new Myron(parent);
 		if(! m.start(CLCamera.CLEYE_VGA, camRate) ) // 640x480, 60fps
 			exit();
-		
+
+		loadSettings();
+
 		m.threshold(threshold);
 
 		cp5 = new ControlP5(parent);
@@ -98,6 +100,9 @@ class LB {
 		cp5.addSlider("debugView", 0, 2, debugView, 10, 20, 128, 15)
 			.moveTo("global")
 			.setNumberOfTickMarks(3)
+			.plugTo(this);
+		cp5.addButton("saveSettings", 0, 200, 20, 70, 15)
+			.moveTo("global")
 			.plugTo(this);
 
 		// camera gui
@@ -237,6 +242,79 @@ class LB {
 			text(int(frameRate), width-10, 0);
 		}
 
+	}
+
+	// saving/loading settings
+	void saveSettings() {
+		JSONObject props = new JSONObject();
+
+		props.setInt("camResX", camResX);
+		props.setInt("camResY", camResY);
+		props.setInt("camRate", camRate);
+		props.setBoolean("debug", debug);
+		props.setFloat("threshold", threshold);
+		props.setInt("ballStateCount", ballStateCount);
+		props.setInt("avgStateCount", avgStateCount);
+		props.setFloat("existingBallThreshold", existingBallThreshold);
+		props.setFloat("newBallThreshold", newBallThreshold);
+		props.setFloat("colorWeight", colorWeight);
+		props.setFloat("positionWeight", positionWeight);
+		props.setFloat("predictedPositionWeight", predictedPositionWeight);
+		props.setFloat("sizeWeight", sizeWeight);
+		props.setFloat("dColorMax", dColorMax);
+		props.setFloat("dPositionMax", dPositionMax);
+		props.setFloat("dPredictedPositionMax", dPredictedPositionMax);
+		props.setFloat("dSizeMax", dSizeMax);
+		props.setFloat("finderThreshold", finderThreshold);
+		props.setFloat("initialCircleProbability", initialCircleProbability);
+		props.setFloat("minFoundCircleRatio", minFoundCircleRatio);
+		props.setInt("minPointCount", minPointCount);
+		props.setInt("maxPredictedStates", maxPredictedStates);
+		props.setFloat("ballProbabilityThreshold", ballProbabilityThreshold);
+		props.setFloat("ballProbabilitySpeedSq", ballProbabilitySpeedSq);
+		props.setFloat("gain", m.getGain());
+		props.setFloat("exposure", m.getExposure());
+		props.setInt("minDensity", m.getMinDensity());
+
+		saveJSONObject(props, "settings.json");
+	}
+
+	void loadSettings() {
+		JSONObject props;
+		try {
+			props = loadJSONObject("settings.json");
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		camResX = props.getInt("camResX", camResX);
+		camResY = props.getInt("camResY", camResY);
+		camRate = props.getInt("camRate", camRate);
+		debug = props.getBoolean("debug", debug);
+		threshold = props.getFloat("threshold", threshold);
+		ballStateCount = props.getInt("ballStateCount", ballStateCount);
+		avgStateCount = props.getInt("avgStateCount", avgStateCount);
+		existingBallThreshold = props.getFloat("existingBallThreshold", existingBallThreshold);
+		newBallThreshold = props.getFloat("newBallThreshold", newBallThreshold);
+		colorWeight = props.getFloat("colorWeight", colorWeight);
+		positionWeight = props.getFloat("positionWeight", positionWeight);
+		predictedPositionWeight = props.getFloat("predictedPositionWeight", predictedPositionWeight);
+		sizeWeight = props.getFloat("sizeWeight", sizeWeight);
+		dColorMax = props.getFloat("dColorMax", dColorMax);
+		dPositionMax = props.getFloat("dPositionMax", dPositionMax);
+		dPredictedPositionMax = props.getFloat("dPredictedPositionMax", dPredictedPositionMax);
+		dSizeMax = props.getFloat("dSizeMax", dSizeMax);
+		finderThreshold = props.getFloat("finderThreshold", finderThreshold);
+		initialCircleProbability = props.getFloat("initialCircleProbability", initialCircleProbability);
+		minFoundCircleRatio = props.getFloat("minFoundCircleRatio", minFoundCircleRatio);
+		minPointCount = props.getInt("minPointCount", minPointCount);
+		maxPredictedStates = props.getInt("maxPredictedStates", maxPredictedStates);
+		ballProbabilityThreshold = props.getFloat("ballProbabilityThreshold", ballProbabilityThreshold);
+		ballProbabilitySpeedSq = props.getFloat("ballProbabilitySpeedSq", ballProbabilitySpeedSq);
+		m.setGain(props.getFloat("gain", m.getGain()));
+		m.setExposure(props.getFloat("exposure", m.getExposure()));
+		m.setMinDensity(props.getInt("minDensity", m.getMinDensity()));
 	}
 
 	// User input - calibrating camera and animation
