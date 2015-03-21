@@ -21,6 +21,7 @@ class Myron {
 	float threshold = 130;
 	int minDensity = 50;
 
+	int[] backgroundPixels;
 	boolean[] globPixels;
 	int[] globIDs;
 	int[][] globBoundingBoxArray;
@@ -75,6 +76,7 @@ class Myron {
 
 		pixelCount = width*height;
 		camPixels = new int[pixelCount];
+		backgroundPixels = new int[pixelCount];
 		globPixels = new boolean[pixelCount];
 		globIDs = new int[pixelCount];
 
@@ -152,7 +154,7 @@ class Myron {
 	}
 
 	void debugPixels(int[] p) {
-		img.pixels = p;
+		arrayCopy(camPixels, img.pixels);
 		img.updatePixels();
 		image(img, 0, 0);
 	}
@@ -162,6 +164,13 @@ class Myron {
 		}
 		img.updatePixels();
 		image(img, 0, 0);
+	}
+
+	void adapt() {
+		// for (int i = 0; i < pixelCount; ++i) {
+		// 	backgroundPixels[i] = camPixels[i];
+		// }
+		arrayCopy(camPixels, backgroundPixels);
 	}
 
 	void update() {
@@ -183,6 +192,17 @@ class Myron {
 			int r = (argb >> 16) & 0xFF;
 			int g = (argb >> 8) & 0xFF;
 			int b = argb & 0xFF;
+			if(backgroundPixels != null) {
+				int brgb = backgroundPixels[i];
+				r -= (brgb >> 16) & 0xFF;
+				g -= (brgb >> 8) & 0xFF;
+				b -= brgb & 0xFF;
+
+				r = abs(r);
+				g = abs(g);
+				b = abs(b);
+			}
+
 			if(r+g+b > threshold)
 				globPixels[i] = true;
 			else

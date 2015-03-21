@@ -119,6 +119,7 @@ class LB {
 		cp5.addSlider("brightnessThreshold", 0, 1024, threshold, 10, 100, 128, 15)
 			.setNumberOfTickMarks(256)
 			.plugTo(this);
+		cp5.addButton("adapt", 0, 10, 140, 128, 15).plugTo(this);
 
 		// glob finding
 		int globSize = m.getMinDensity();
@@ -266,16 +267,18 @@ class LB {
 		ballProbabilitySpeedSq = value*value;
 	}
 
+	void adapt() {
+		m.adapt();
+		balls.adapt();
+	}
+
 	void keyPressed() {
 		switch(keyCode) {
 			case ' ': 
 				saveFrame("diagram-####.jpg"); //tga is the fastest..but you can specify jpg,png...
 				break;
 			case 'A':
-				// m.adapt();
-				// color c = m.average(0, 0, camResX, camResY);
-				// m.trackNotColor(int(red(c)), int(green(c)), int(blue(c)), 255);
-				balls.adapt();
+				adapt();				
 				break;
 			case 'D':
 				debug = !debug;
