@@ -356,8 +356,9 @@ class LB {
 
 	void keyPressed() {
 		switch(keyCode) {
-			case ' ': 
-				saveFrame("diagram-####.jpg"); //tga is the fastest..but you can specify jpg,png...
+			case ' ':
+				String date = year()+"-"+month()+"-"+day()+"_"+hour()+"-"+minute()+"-"+second();
+				saveFrame("screenshots/screenshot_"+date+".png"); //tga is the fastest..but you can specify jpg,png...
 				break;
 			case 'A':
 				adapt();				
