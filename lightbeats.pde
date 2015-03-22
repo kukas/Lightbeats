@@ -80,7 +80,11 @@ class LB {
 	void setup() {
 		setupTimestamp = System.nanoTime();
 		m = new Myron(parent);
-		if(! m.start(CLCamera.CLEYE_VGA, camRate) ) // 640x480, 60fps
+
+		int res = CLCamera.CLEYE_VGA;
+		if(camResX == 320 && camResY == 240)
+			res = CLCamera.CLEYE_QVGA;
+		if(! m.start(res, camRate) ) // 640x480, 60fps
 			exit();
 
 		loadSettings();
