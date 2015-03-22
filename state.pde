@@ -4,7 +4,7 @@ class State {
 	PVector ssize;
 	long timestamp;
 
-	int globId;
+	int globId = -1;
 	boolean predicted = false;
 
 	State() {

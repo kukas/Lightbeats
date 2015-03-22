@@ -97,8 +97,8 @@ class Balls {
 					noFill();
 				}
 
-				// if(circleCount > 0 && state.globId != null){
-				if(circleCount > 0){
+				if(circleCount > 0 && state.globId != -1){
+				// if(circleCount > 0){
 					int[][] boundary = globPixels[state.globId];
 					ArrayList<State> circles = finder.findCircles(boundary, state, circleCount);
 
