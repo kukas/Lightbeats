@@ -42,8 +42,8 @@ class LB {
 	
 	// finder
 	float finderThreshold = 0.7;
-	float initialCircleProbability = 0.15;
-	float minFoundCircleRatio = 1.5;
+	float firstCircleThreshold = 0.1;
+	float minNextCircleThresholdRatio = 0.6;
 	int minPointCount = 40;
 
 	// ball path prediction
@@ -135,14 +135,14 @@ class LB {
 		cp5.addSlider("minGlobSize", 0, 512, globSize, 10, 120, 128, 15).plugTo(this);
 		
 		cp5.addTextlabel("label2").setPosition(10, 38).setText("Ball state storage").moveTo("ball detection");
-		cp5.addSlider("ballStateCount", 0, 32, ballStateCount, 10, 50, 128, 15).plugTo(this).moveTo("ball detection");
+		cp5.addSlider("ballStateCount", 0, 128, ballStateCount, 10, 50, 128, 15).plugTo(this).moveTo("ball detection");
 		cp5.addSlider("avgStateCount", 0, 32, avgStateCount, 10, 70, 128, 15).plugTo(this).moveTo("ball detection");
 
-		cp5.addTextlabel("label3").setPosition(10, 88).setText("Ball detection thresholds").moveTo("ball detection");
+		cp5.addTextlabel("label3").setPosition(10, 88).setText("State identification thresholds").moveTo("ball detection");
 		cp5.addSlider("existingBallThreshold", 0, 1, existingBallThreshold, 10, 100, 128, 15).plugTo(this).moveTo("ball detection");
 		cp5.addSlider("newBallThreshold", 0, 1, newBallThreshold, 10, 120, 128, 15).plugTo(this).moveTo("ball detection");
 
-		cp5.addTextlabel("label6").setPosition(10, 138).setText("Ball identification").moveTo("ball detection");
+		cp5.addTextlabel("label6").setPosition(10, 138).setText("State identification").moveTo("ball detection");
 		cp5.addSlider("colorWeight", 0, 1, colorWeight, 10, 150, 128, 15).plugTo(this).moveTo("ball detection");
 		cp5.addSlider("positionWeight", 0, 1, positionWeight, 10, 170, 128, 15).plugTo(this).moveTo("ball detection");
 		cp5.addSlider("predictedPositionWeight", 0, 1, predictedPositionWeight, 10, 190, 128, 15).plugTo(this).moveTo("ball detection");
@@ -160,8 +160,8 @@ class LB {
 
 		cp5.addTextlabel("label5").setPosition(10, 38).setText("Circle finder").moveTo("circle finder");
 		cp5.addSlider("finderThreshold", 0, 1, finderThreshold, 10, 50, 128, 15).plugTo(this).moveTo("circle finder");
-		cp5.addSlider("initialCircleProbability", 0, 1, initialCircleProbability, 10, 70, 128, 15).plugTo(this).moveTo("circle finder");
-		cp5.addSlider("minFoundCircleRatio", 0, 16, minFoundCircleRatio, 10, 90, 128, 15).plugTo(this).moveTo("circle finder");
+		cp5.addSlider("firstCircleThreshold", 0, 1, firstCircleThreshold, 10, 70, 128, 15).plugTo(this).moveTo("circle finder");
+		cp5.addSlider("minNextCircleThresholdRatio", 0, 16, minNextCircleThresholdRatio, 10, 90, 128, 15).plugTo(this).moveTo("circle finder");
 		cp5.addSlider("minPointCount", 3, 100, minPointCount, 10, 110, 128, 15).plugTo(this).moveTo("circle finder");
 
 		if(!debug)
@@ -270,8 +270,8 @@ class LB {
 		props.setFloat("dPredictedPositionMax", dPredictedPositionMax);
 		props.setFloat("dSizeMax", dSizeMax);
 		props.setFloat("finderThreshold", finderThreshold);
-		props.setFloat("initialCircleProbability", initialCircleProbability);
-		props.setFloat("minFoundCircleRatio", minFoundCircleRatio);
+		props.setFloat("firstCircleThreshold", firstCircleThreshold);
+		props.setFloat("minNextCircleThresholdRatio", minNextCircleThresholdRatio);
 		props.setInt("minPointCount", minPointCount);
 		props.setInt("maxPredictedStates", maxPredictedStates);
 		props.setFloat("ballProbabilityThreshold", ballProbabilityThreshold);
@@ -310,8 +310,8 @@ class LB {
 		dPredictedPositionMax = props.getFloat("dPredictedPositionMax", dPredictedPositionMax);
 		dSizeMax = props.getFloat("dSizeMax", dSizeMax);
 		finderThreshold = props.getFloat("finderThreshold", finderThreshold);
-		initialCircleProbability = props.getFloat("initialCircleProbability", initialCircleProbability);
-		minFoundCircleRatio = props.getFloat("minFoundCircleRatio", minFoundCircleRatio);
+		firstCircleThreshold = props.getFloat("firstCircleThreshold", firstCircleThreshold);
+		minNextCircleThresholdRatio = props.getFloat("minNextCircleThresholdRatio", minNextCircleThresholdRatio);
 		minPointCount = props.getInt("minPointCount", minPointCount);
 		maxPredictedStates = props.getInt("maxPredictedStates", maxPredictedStates);
 		ballProbabilityThreshold = props.getFloat("ballProbabilityThreshold", ballProbabilityThreshold);
@@ -392,8 +392,8 @@ boolean sketchFullScreen() {
 }
 LB lightbeats;
 void setup() {
-	size(640, 480);
-	// size(displayWidth, displayHeight);
+	// size(640, 480);
+	size(displayWidth, displayHeight);
 	frameRate(-1);
 
 	lightbeats = new LB(this);

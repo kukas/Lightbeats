@@ -33,7 +33,7 @@ class Finder {
 			}
 		}
 
-		float lastCircleProbability = lb.initialCircleProbability;
+		float lastCircleProbability = lb.firstCircleThreshold/lb.minNextCircleThresholdRatio;
 		int maxCircles = circleCount;
 		while(maxCircles-- > 0){
 			int[][] histogram = new int[size][size];
@@ -161,7 +161,7 @@ class Finder {
 
 			float circleProbability = maxValue*maxRadiusValue/float(votes) * (pointCount - newPointCount)/pointCount;
 
-			if(lastCircleProbability/circleProbability < lb.minFoundCircleRatio){
+			if(lastCircleProbability*lb.minNextCircleThresholdRatio < circleProbability){
 				color globColor = lb.m.average(maxCoords[0]-avgRadius, maxCoords[1]-avgRadius, maxCoords[0]+avgRadius, maxCoords[1]+avgRadius);
 				PVector globPosition = new PVector(maxCoords[0], maxCoords[1]);
 				PVector globSize = new PVector(avgDiameter, avgDiameter);
