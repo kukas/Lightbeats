@@ -90,14 +90,14 @@ class Balls {
 					}
 				}
 
-				if(lb.debug && lb.debugView == 2){
-					fill(128);
-					textAlign(CENTER, BOTTOM);
-					text(circleCount, state.sposition.x, state.sposition.y-state.ssize.y/2);
-					noFill();
-				}
 
 				if(circleCount > 0 && state.globId != -1){
+					if(lb.debug && lb.debugView == 2){
+						fill(128);
+						textAlign(CENTER, BOTTOM);
+						text(circleCount, state.sposition.x, state.sposition.y-state.ssize.y/2);
+						noFill();
+					}
 				// if(circleCount > 0){
 					int[][] boundary = globPixels[state.globId];
 					ArrayList<State> circles = finder.findCircles(boundary, state, circleCount);
