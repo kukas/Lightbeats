@@ -329,8 +329,7 @@ class LB {
 	}
 
 	void cameraSettings() {
-		if(!m.usingCL)
-			m.m.settings();
+
 	}
 
 	void gain(float value) {

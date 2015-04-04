@@ -1,9 +1,6 @@
 import cl.eye.*;
-import JMyron.*;
 
 class Myron {
-	// cam access JMyron
-	JMyron m;
 	// cam access CL-Eye
 	boolean usingCL = false;
 	PApplet papplet;
@@ -65,13 +62,12 @@ class Myron {
 			height = 240;
 		}
 
-		if(numCams == 0) {
-			println("Falling back to JMyron");
-			startJMyron(width, height);
-		}
-		else {
+		if(numCams > 0) {
 			println("Starting CL Eye");
 			startCLEye(resolution, rate);
+		}
+		else {
+			return false;
 		}
 
 		pixelCount = width*height;
@@ -93,12 +89,6 @@ class Myron {
 		img = createImage(width, height, RGB);
 
 		return true;
-	}
-
-	void startJMyron(int camResX, int camResY) {
-		m = new JMyron();
-		m.start(camResX, camResY);
-		m.findGlobs(0);
 	}
 
 	void startCLEye(int resolution, int rate) {
@@ -174,13 +164,7 @@ class Myron {
 	}
 
 	void update() {
-		if(usingCL){
-			cam.getCameraFrame(camPixels, 1000);
-		}
-		else{
-			m.update();
-			camPixels = m.image();
-		}
+		cam.getCameraFrame(camPixels, 1000);
 
 		thresholdFilter();
 		processGlobs();
@@ -348,10 +332,7 @@ class Myron {
 	}
 
 	void stop() {
-		if(usingCL)
-			cam.dispose();
-		else
-			m.stop();
+		cam.dispose();
 	}
 
 	void threshold(float value) {
@@ -359,9 +340,6 @@ class Myron {
 	}
 
 	color average(int x1, int y1, int x2, int y2) {
-		if(!usingCL)
-			return m.average(x1, y1, x2, y2);
-
 		x1 = max(x1, 0);
 		y1 = max(y1, 0);
 		x2 = min(x2, width-1);
