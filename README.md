@@ -3,7 +3,7 @@
 Lightbeats je aplikace napsaná v [Processingu](https://processing.org/) pro tracking svítících žonglovacích míčků a vizualizaci jejich trajektorií.
 
 ## Instalace
-Pro spuštění Lightbeats je potřeba [Processing](https://processing.org/download/?processing). Projekt využívá knihovny [JMyron](http://webcamxtra.sourceforge.net/download.shtml) a [ControlP5](http://www.sojamo.de/libraries/controlP5/), pro jejich instalaci se řiďte instrukcemi na jejich stránkách.
+Pro spuštění Lightbeats je potřeba [Processing](https://processing.org/download/?processing). Projekt využívá knihovny [JMyron](http://webcamxtra.sourceforge.net/download.shtml), [ControlP5](http://www.sojamo.de/libraries/controlP5/) a [CL-Eye SDK](https://codelaboratories.com/about/), pro jejich instalaci se řiďte instrukcemi na jejich stránkách, případně využijte připravené knihovny ve složce `libraries` (složku překopírujte do složky `Dokumenty/Processing/`). Knihovna CL-Eye je komerční, pro použití programu s kamerou PS3Eye je nutné zakoupit driver a SDK na oficiálním webu.
 
 ## Použití
 Otevřete lightbeats.pde v Processingu a spustťe. Aplikace vyžaduje připojenou webkameru. Pro nejlepší výsledky program používejte v temném prostředí.
