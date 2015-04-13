@@ -59,6 +59,10 @@ class LB {
 	int[][] globArray;
 	int[][][] globPixels;
 
+	// server
+	LBServer server;
+	int port = 10002;
+
 	ControlP5 cp5;
 
 	long setupTimestamp;
@@ -67,9 +71,6 @@ class LB {
 
 	// processing
 	Balls balls;
-
-	// view
-	Renderer renderer;
 
 	PApplet parent;
 
@@ -168,9 +169,7 @@ class LB {
 			cp5.hide();
 
 		balls = new Balls(this);
-		renderer = new Renderer(this);
-
-		renderer.init();
+		server = new LBServer(parent, port);
 	}
 
 	void draw() {
@@ -219,12 +218,10 @@ class LB {
 
 		balls.processGlobs(globArray, globPixels);
 
+		server.send(balls.balls, frameTimestamp);
+
 		if(debug && debugView != 1){
 			balls.render();
-		}
-
-		if(!debug){
-			renderer.render();
 		}
 
 		if(debug) {
@@ -238,14 +235,11 @@ class LB {
 			saveFrame("frames/####.tga");
 		}
 
-		if(debug){
-			// FPS
-			fill(255,255,0);
-			textSize(16);
-			textAlign(RIGHT, TOP);
-			text(int(frameRate), width-10, 0);
-		}
-
+		// FPS
+		fill(255,255,0);
+		textSize(16);
+		textAlign(RIGHT, TOP);
+		text(int(frameRate), width-10, 0);
 	}
 
 	// saving/loading settings
@@ -382,18 +376,19 @@ class LB {
 	//-----------------------------------------------------------------------------------------------------------
 	void stop() {
 		m.stop();
+		server.stop();
 	}
 };
 // -----------------------------------------
 
 // zapne fullscreen
 boolean sketchFullScreen() {
-	return true;
+	return false;
 }
 LB lightbeats;
 void setup() {
-	// size(640, 480);
-	size(displayWidth, displayHeight);
+	size(640, 480);
+	// size(displayWidth, displayHeight);
 	frameRate(-1);
 
 	lightbeats = new LB(this);
