@@ -17,8 +17,11 @@ import processing.core.*;
 public class CLCamera
 {
     // camera color mode
-    public static int CLEYE_GRAYSCALE		= 0;
-    public static int CLEYE_COLOR		= 1;
+    public static int CLEYE_MONO_PROCESSED  = 0;
+    public static int CLEYE_COLOR_PROCESSED = 1;
+    public static int CLEYE_MONO_RAW            = 2;
+    public static int CLEYE_COLOR_RAW           = 3;
+    public static int CLEYE_BAYER_RAW           = 4;
 
     // camera resolution
     public static int CLEYE_QVGA		= 0;	// Allowed frame rates: 15, 30, 60, 75, 100, 125

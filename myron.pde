@@ -107,7 +107,7 @@ class Myron {
 		println("Camera UUID " + CLCamera.cameraUUID(0));
 		cam = new CLCamera(papplet);
 		// ----------------------(i, CLEYE_GRAYSCALE/COLOR, CLEYE_QVGA/VGA, Framerate)
-		cam.createCamera(0, CLCamera.CLEYE_COLOR, resolution, rate);
+		cam.createCamera(0, CLCamera.CLEYE_COLOR_PROCESSED, resolution, rate);
 
 		cam.setCameraParam(CLCamera.CLEYE_AUTO_GAIN, 0);
 		cam.setCameraParam(CLCamera.CLEYE_AUTO_EXPOSURE, 0);
