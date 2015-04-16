@@ -1,17 +1,22 @@
 import processing.net.*;
 import java.nio.ByteBuffer;
+import java.util.zip.CRC32;
 
 class LBServer {
 	Server server;
+	CRC32 crc;
 
 	LBServer(PApplet parent, int port) {
 		server = new Server(parent, port);
+		crc = new CRC32();
 	}
 
 	void send(ArrayList<Ball> balls, long timestamp) {
 		int count = balls.size();
 		// 25 bits per ball + 8 for timestamp + 1 for count
-		ByteBuffer buffer = ByteBuffer.allocate(25*count + 9);
+		ByteBuffer buffer = ByteBuffer.allocate(25*count + 17);
+		// long checksum (8 bits) (pouze vyhrazené místo)
+		buffer.position(8);
 		// long timestamp (8 bits)
 		buffer.putLong(timestamp);
 		// ball count (1 bit)
@@ -39,6 +44,16 @@ class LBServer {
 			// [int color] (4 bits)
 			buffer.putInt(state.scolor);
 		}
+		// přetočí buffer na začátek, vynechá prvních 8 bitů jako místo pro checksum
+		// buffer.position(7);
+		// připraví crc
+		crc.reset();
+		// vypočítá crc od position na konec
+		// println(buffer.array().length, buffer.capacity());
+		crc.update(buffer.array(), 8, buffer.capacity() - 8);
+		// přidá na začátek crc
+		buffer.putLong(0, crc.getValue());
+
 		byte[] data = buffer.array();
 		server.write(data);
 	}

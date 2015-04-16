@@ -1,5 +1,6 @@
 import processing.net.*;
 import java.nio.ByteBuffer;
+import java.util.zip.CRC32;
 
 class Ball {
 	ArrayList<State> stateHistory;
@@ -55,13 +56,15 @@ class LBClient {
 	ArrayList<Ball> balls;
 	Renderer renderer;
 	long timestamp;
+	CRC32 crc;
 
 	LBClient(PApplet parent, String host, int port) {
 		client = new Client(parent, host, port);
-		data = new byte[9 + 25*16]; // místo pro 16 míčků najednou
 		balls = new ArrayList<Ball>();
 
 		renderer = new Renderer();
+
+		crc = new CRC32();
 	}
 
 	Ball updateBall(int id, State state) {
@@ -79,18 +82,27 @@ class LBClient {
 	}
 
 	void receive() {
-		if(client.available() <= 8)
+		if(client.available() <= 16)
 			return;
 		data = client.readBytes();
 		ByteBuffer buffer = ByteBuffer.wrap(data);
+		
+		// long checksum (8 bits)
+		long checksum = buffer.getLong();
+		crc.reset();
+		crc.update(buffer.array(), 8, buffer.capacity() - 8);
+		// checkování checksumu
+		if(crc.getValue() != checksum)
+			return;
+
 		// long timestamp (8 bits)
 		timestamp = buffer.getLong();
 
 		// kontrola správné délky zprávy
-		if((data.length-9) % 25 != 0)
+		if((data.length-17) % 25 != 0)
 			return;
 
-		int count = (data.length-9)/25;
+		int count = (data.length-17)/25;
 		// byte count (1 bit)
 		byte countCheck = buffer.get();
 
