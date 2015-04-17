@@ -13,15 +13,15 @@ class Myron {
 	int height;
 	int pixelCount;
 	// camera settings (CL-Eye only)
-	float gain = 0.3;
-	float exposure = 0.5;
+	float gain = 0;
+	float exposure = 0.6;
 
 	// image processing
 	// - settings
 	float threshold = 130;
 	int minDensity = 50;
-	boolean process = true;
 
+	int[] backgroundPixels;
 	boolean[] globPixels;
 	int[] globIDs;
 	int[][] globBoundingBoxArray;
@@ -76,6 +76,7 @@ class Myron {
 
 		pixelCount = width*height;
 		camPixels = new int[pixelCount];
+		backgroundPixels = new int[pixelCount];
 		globPixels = new boolean[pixelCount];
 		globIDs = new int[pixelCount];
 
@@ -106,11 +107,11 @@ class Myron {
 		println("Camera UUID " + CLCamera.cameraUUID(0));
 		cam = new CLCamera(papplet);
 		// ----------------------(i, CLEYE_GRAYSCALE/COLOR, CLEYE_QVGA/VGA, Framerate)
-		cam.createCamera(0, CLCamera.CLEYE_COLOR, resolution, rate);
+		cam.createCamera(0, CLCamera.CLEYE_COLOR_PROCESSED, resolution, rate);
 
 		cam.setCameraParam(CLCamera.CLEYE_AUTO_GAIN, 0);
 		cam.setCameraParam(CLCamera.CLEYE_AUTO_EXPOSURE, 0);
-		cam.setCameraParam(CLCamera.CLEYE_AUTO_WHITEBALANCE, 0);
+		cam.setCameraParam(CLCamera.CLEYE_AUTO_WHITEBALANCE, 1);
 
 		setGain(gain);
 		setExposure(exposure);
@@ -152,12 +153,8 @@ class Myron {
 		minDensity = value;
 	}
 
-	void findGlobs(boolean find) {
-		process = find;
-	}
-
 	void debugPixels(int[] p) {
-		img.pixels = p;
+		arrayCopy(camPixels, img.pixels);
 		img.updatePixels();
 		image(img, 0, 0);
 	}
@@ -169,6 +166,13 @@ class Myron {
 		image(img, 0, 0);
 	}
 
+	void adapt() {
+		// for (int i = 0; i < pixelCount; ++i) {
+		// 	backgroundPixels[i] = camPixels[i];
+		// }
+		arrayCopy(camPixels, backgroundPixels);
+	}
+
 	void update() {
 		if(usingCL){
 			cam.getCameraFrame(camPixels, 1000);
@@ -178,14 +182,8 @@ class Myron {
 			camPixels = m.image();
 		}
 
-		if(process){
-			thresholdFilter();
-			processGlobs();
-		}
-	}
-
-	int[] cameraImage() {
-		return camPixels;
+		thresholdFilter();
+		processGlobs();
 	}
 
 	void thresholdFilter() {
@@ -194,6 +192,17 @@ class Myron {
 			int r = (argb >> 16) & 0xFF;
 			int g = (argb >> 8) & 0xFF;
 			int b = argb & 0xFF;
+			if(backgroundPixels != null) {
+				int brgb = backgroundPixels[i];
+				r -= (brgb >> 16) & 0xFF;
+				g -= (brgb >> 8) & 0xFF;
+				b -= brgb & 0xFF;
+
+				r = abs(r);
+				g = abs(g);
+				b = abs(b);
+			}
+
 			if(r+g+b > threshold)
 				globPixels[i] = true;
 			else

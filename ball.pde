@@ -41,7 +41,7 @@ class Ball {
 		stateHistory.add(0, state);
 
 		// zobrazí predikovaný stav při přidávání nového míčku, lze tím dobře srovnávat úspěšnost predikce
-		if(lb.debug){
+		if(lb.debug && lb.debugView == 0){
 			stroke(255, 0, 255);
 			noFill();
 			ellipse(predictedState.sposition.x, predictedState.sposition.y, predictedState.ssize.x, predictedState.ssize.y);
@@ -197,7 +197,7 @@ class Ball {
 				State state = getState();
 				float avgDiff = PVector.sub(avgState.sposition, state.sposition).magSq();
 				// pokud se hýbe víc než 10px/frame
-				float minAvgDiff = 100;
+				float minAvgDiff = lb.ballProbabilitySpeedSq;
 				ballProbability = ballProbability + (constrain(avgDiff/minAvgDiff, 0.0, 1.0) - ballProbability)*0.2;
 			}
 		}

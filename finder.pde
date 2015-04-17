@@ -21,7 +21,19 @@ class Finder {
 
 		ArrayList<State> circles = new ArrayList<State>();
 
-		float lastCircleProbability = 0.15;
+		if(lb.debug && lb.debugView == 2){
+			stroke(128, 0, 128);
+			strokeWeight(1);
+			if(boundary!=null){
+				beginShape(POINTS);
+				for(int j=0;j<pointCount;j++){
+					vertex(boundary[j][0], boundary[j][1]);
+				}
+				endShape();
+			}
+		}
+
+		float lastCircleProbability = lb.firstCircleThreshold/lb.minNextCircleThresholdRatio;
 		int maxCircles = circleCount;
 		while(maxCircles-- > 0){
 			int[][] histogram = new int[size][size];
@@ -113,6 +125,7 @@ class Finder {
 			}
 
 			avgRadius /= sumRadius;
+			int avgDiameter = 2*avgRadius;
 
 			boolean[] pixelDelete = new boolean[pointCount];
 			int newPointCount = 0;
@@ -129,50 +142,58 @@ class Finder {
 				}
 			}
 
-			// println(maxValue);
-			// if(maxValue > 1){
-			// 	strokeWeight(1);
-			// 	// fill(0,0,0,200);
-			// 	noFill();
-			// 	stroke(255, 255, 255);
-			// 	rect(xbox, ybox, size, size);
+			if(maxValue > 1 && lb.debug && lb.debugView == 2){
+				strokeWeight(1);
+				noFill();
+				stroke(255, 0, 0);
+				rect(xbox, ybox, size, size);
 
-			// 	for (int x = 0; x < size; x++) {
-			// 		for (int y = 0; y < size; y++) {
-			// 			if(histogram[x][y] > 0){
-			// 				stroke(histogram[x][y]/float(maxValue)*255.0, 255);
-			// 				point(x+xbox, y+ybox);
-			// 			}
-			// 		}
-			// 	}
-			// }
+				for (int x = 0; x < size; x++) {
+					for (int y = 0; y < size; y++) {
+						if(histogram[x][y] > 0){
+							stroke(histogram[x][y]/float(maxValue)*255.0, 0, 0);
+							point(x+xbox, y+ybox);
+						}
+					}
+				}
+			}
 
 
 			float circleProbability = maxValue*maxRadiusValue/float(votes) * (pointCount - newPointCount)/pointCount;
 
-			if(lastCircleProbability/circleProbability < 1.5){
-				// fill(0, 255, 0, 200);
-				// text(""+circleProbability, maxCoords[0], maxCoords[1]);
-				// noFill();
-
+			if(lastCircleProbability*lb.minNextCircleThresholdRatio < circleProbability){
 				color globColor = lb.m.average(maxCoords[0]-avgRadius, maxCoords[1]-avgRadius, maxCoords[0]+avgRadius, maxCoords[1]+avgRadius);
 				PVector globPosition = new PVector(maxCoords[0], maxCoords[1]);
-				PVector globSize = new PVector(avgRadius*2, avgRadius*2);
+				PVector globSize = new PVector(avgDiameter, avgDiameter);
 
 				State state = new State(globColor, globPosition, globSize, lb.frameTimestamp);
 				circles.add(state);
+
+				if(lb.debug && lb.debugView == 2){
+					stroke(0, 255, 0, 100);
+					textAlign(CENTER, TOP);
+					strokeWeight(3);
+					ellipse(maxCoords[0], maxCoords[1], avgDiameter, avgDiameter);
+					fill(0, 255, 0);
+					text(circleProbability, maxCoords[0], maxCoords[1] + avgRadius);
+				}
 			}
 			else {
-				// fill(255, 0, 0, 200);
-				// text(""+circleProbability, maxCoords[0], maxCoords[1]);
-				// noFill();
+				if(lb.debug && lb.debugView == 2){
+					stroke(255, 0, 0, 100);
+					textAlign(CENTER, TOP);
+					strokeWeight(3);
+					ellipse(maxCoords[0], maxCoords[1], avgDiameter, avgDiameter);
+					fill(0, 255, 0);
+					text(circleProbability, maxCoords[0], maxCoords[1] + avgRadius);
+				}
 
 				break;
 			}
 
 			lastCircleProbability = circleProbability;
 
-			if(newPointCount < 40)
+			if(newPointCount < lb.minPointCount)
 				break;
 
 			int[][] newBoundary = new int[newPointCount][2];
@@ -185,16 +206,18 @@ class Finder {
 
 			pointCount = newPointCount;
 			boundary = newBoundary;
+		}
 
-			// stroke(255, 0, 0);
-			// strokeWeight(1);
-			// if(boundary!=null){
-			// 	beginShape(POINTS);
-			// 	for(int j=0;j<boundary.length;j++){
-			// 		vertex(boundary[j][0], boundary[j][1]);
-			// 	}
-			// 	endShape();
-			// }
+		if(lb.debug && lb.debugView == 2){
+			stroke(255);
+			strokeWeight(1);
+			if(boundary!=null){
+				beginShape(POINTS);
+				for(int j=0;j<pointCount;j++){
+					vertex(boundary[j][0], boundary[j][1]);
+				}
+				endShape();
+			}
 		}
 
 		if(circles.size() == 2){

@@ -82,7 +82,7 @@ class Balls {
 
 				int circleCount = 0;
 				for (float probability : probabilities) {
-					if(probability > 0.7 && circleCount < 2){
+					if(probability > lb.finderThreshold && circleCount < 2){
 						circleCount++;
 					}
 					else {
@@ -90,28 +90,17 @@ class Balls {
 					}
 				}
 
-				if(lb.debug){
-					fill(255,255,255);
-					textSize(30);
-					textAlign(LEFT, TOP);
-					text(""+circleCount, state.sposition.x, state.sposition.y);
-					textSize(12);
-				}
 
-				// if(circleCount > 0 && state.globId != null){
-				if(circleCount > 0){
+				if(circleCount > 0 && state.globId != -1){
+					if(lb.debug && lb.debugView == 2){
+						fill(128);
+						textAlign(CENTER, BOTTOM);
+						text(circleCount, state.sposition.x, state.sposition.y-state.ssize.y/2);
+						noFill();
+					}
+				// if(circleCount > 0){
 					int[][] boundary = globPixels[state.globId];
 					ArrayList<State> circles = finder.findCircles(boundary, state, circleCount);
-					if(lb.debug){
-						strokeWeight(3);
-						noFill();
-						for (int j=0; j<circles.size(); j++) {
-							State circle = circles.get(j);
-							stroke(j*255, 255, 0, 128);
-							ellipse(circle.sposition.x, circle.sposition.y, circle.ssize.x, circle.ssize.y);
-						}
-						strokeWeight(1);
-					}
 
 					if(circles.size() == 1){
 						Ball bestBall = ballsProbabilities.get(probabilities[0]);
@@ -153,17 +142,23 @@ class Balls {
 				}
 
 				// známý míček
-				if(probabilities[0] > 0.7){
+				if(probabilities[0] > lb.existingBallThreshold){
 					Ball ball = ballsProbabilities.get(probabilities[0]);
 					ball.updateBall(state);
 					states.remove(state);
 					continue;
 				}
 				// nový míček!
-				if(probabilities[0] < 0.4){
+				if(probabilities[0] < lb.newBallThreshold){
 					addBall(state);
 					states.remove(state);
 					continue;
+				}
+
+				// aktualizuje debugstring pro nejlepší míček
+				if(lb.debug){
+					Ball ball = ballsProbabilities.get(probabilities[0]);
+					ball.getProbability(state);
 				}
 
 				// ostatní případy jsou sporné a chce se mi z nich plakat
@@ -183,7 +178,7 @@ class Balls {
 			// projde všechny míčky, ke kterým nebyl nalezen glob
 			if(!ball.updated){
 				// několik stavů si míček dopočítá
-				if(ball.predictedStates < 3){
+				if(ball.predictedStates < lb.maxPredictedStates){
 					ball.predict();
 				}
 				// pokud počet dopočítaných stavů překročí hranici
@@ -204,13 +199,15 @@ class Balls {
 	}
 
 	void render() {
-		for (Ball ball : balls) {
-			ball.render();
-		}
+		if(lb.debugView != 2){
+			for (Ball ball : balls) {
+				ball.render();
+			}
 
-		fill(255,255,255);
-		textSize(16);
-		textAlign(LEFT, TOP);
-		text(debugString, 0, 0);
+			fill(255,255,255);
+			textSize(16);
+			textAlign(LEFT, TOP);
+			text(debugString, 0, 0);
+		}
 	}
 };
