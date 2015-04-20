@@ -1,12 +1,12 @@
-# [Lightbeats](http://www.lightbeats.cz/)
+# Lightbeats
 
-Lightbeats je aplikace napsaná v [Processingu](https://processing.org/) pro tracking svítících žonglovacích míčků a vizualizaci jejich trajektorií.
+Lightbeats je aplikace napsaná v [Processingu](https://processing.org/) pro tracking svítících žonglovacích míčků webkamerou a vizualizaci jejich trajektorií.
 
 - **Propagační web:** [www.lightbeats.cz](http://www.lightbeats.cz/)  
 - **Ukázka:** [screenshoty](https://github.com/kukas/Lightbeats/#screenshoty)
 - **Download:** [link na release](https://github.com/kukas/Lightbeats/releases)
 - **Dokumentace:** [uživatelská i programátorská dokumentace](https://github.com/kukas/Lightbeats/blob/master/docs/lightbeats_dokumentace.pdf)
-- **Repozitář:** [kukas/Lightbeats](http://github.com/kukas/Lightbeats) + [fork](http://github.com/gjkcz/Lightbeats)
+- **Repozitář:** [kukas/Lightbeats](http://github.com/kukas/Lightbeats) + [fork](http://github.com/gjkcz/Lightbeats) se stavem maturitní práce
 - **Autor:** [Jiří Balhar](http://kukas.homenet.org/)
 - **Maturitní práce 2014/15** na [GJK](https://github.com/gjkcz/gjkcz)
 
