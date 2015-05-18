@@ -70,6 +70,7 @@ class LB {
 
 	// view
 	Renderer renderer;
+	boolean pauseRender = false;
 
 	PApplet parent;
 
@@ -180,11 +181,15 @@ class LB {
 		deltaTime = (now - frameTimestamp)*1E-6;
 		frameTimestamp = now;
 		
-		background(0); //Set background black
 
 		globArray = m.globBoxes();
 		globPixels = m.globEdgePoints();
-		if(debug){
+		
+		if(!pauseRender)
+			background(0); //Set background black
+		
+		
+		if(debug && !pauseRender){
 			// Zobrazí obrázek z webkamery
 			if(debugView == 0){
 				m.debugPixels(m.camPixels);
@@ -218,6 +223,9 @@ class LB {
 		}
 
 		balls.processGlobs(globArray, globPixels);
+
+		if(pauseRender)
+			return;
 
 		if(debug && debugView != 1){
 			balls.render();
@@ -361,7 +369,15 @@ class LB {
 				saveFrame("screenshots/screenshot_"+date+".png"); //tga is the fastest..but you can specify jpg,png...
 				break;
 			case 'A':
-				adapt();				
+				adapt();
+				break;
+			case 'N':
+				if(!debug){
+					renderer.nextView();
+				}
+				break;
+			case 'P':
+				pauseRender = !pauseRender;
 				break;
 			case 'D':
 				debug = !debug;
@@ -378,6 +394,11 @@ class LB {
 				stop();
 				break;
 		}
+	}
+
+	void mousePressed() {
+		if (mouseButton == RIGHT && !debug)
+			renderer.nextView();
 	}
 	//-----------------------------------------------------------------------------------------------------------
 	void stop() {
@@ -411,4 +432,8 @@ void keyPressed() {
 public void stop() {
 	lightbeats.stop();
 	super.stop();
+}
+
+void mousePressed() {
+	lightbeats.mousePressed();
 }

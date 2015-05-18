@@ -90,9 +90,8 @@ class Balls {
 					}
 				}
 
-
 				if(circleCount > 0 && state.globId != -1){
-					if(lb.debug && lb.debugView == 2){
+					if(lb.debug && lb.debugView == 2  && !lb.pauseRender){
 						fill(128);
 						textAlign(CENTER, BOTTOM);
 						text(circleCount, state.sposition.x, state.sposition.y-state.ssize.y/2);
@@ -207,7 +206,7 @@ class Balls {
 			fill(255,255,255);
 			textSize(16);
 			textAlign(LEFT, TOP);
-			text(debugString, 0, 0);
+			text(debugString, 300, 0);
 		}
 	}
 };

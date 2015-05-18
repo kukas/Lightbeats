@@ -21,7 +21,7 @@ class Finder {
 
 		ArrayList<State> circles = new ArrayList<State>();
 
-		if(lb.debug && lb.debugView == 2){
+		if(lb.debug && lb.debugView == 2 && !lb.pauseRender){
 			stroke(128, 0, 128);
 			strokeWeight(1);
 			if(boundary!=null){
@@ -142,7 +142,7 @@ class Finder {
 				}
 			}
 
-			if(maxValue > 1 && lb.debug && lb.debugView == 2){
+			if(maxValue > 1 && lb.debug && lb.debugView == 2 && !lb.pauseRender){
 				strokeWeight(1);
 				noFill();
 				stroke(255, 0, 0);
@@ -169,7 +169,7 @@ class Finder {
 				State state = new State(globColor, globPosition, globSize, lb.frameTimestamp);
 				circles.add(state);
 
-				if(lb.debug && lb.debugView == 2){
+				if(lb.debug && lb.debugView == 2 && !lb.pauseRender){
 					stroke(0, 255, 0, 100);
 					textAlign(CENTER, TOP);
 					strokeWeight(3);
@@ -179,7 +179,7 @@ class Finder {
 				}
 			}
 			else {
-				if(lb.debug && lb.debugView == 2){
+				if(lb.debug && lb.debugView == 2 && !lb.pauseRender){
 					stroke(255, 0, 0, 100);
 					textAlign(CENTER, TOP);
 					strokeWeight(3);
@@ -208,7 +208,7 @@ class Finder {
 			boundary = newBoundary;
 		}
 
-		if(lb.debug && lb.debugView == 2){
+		if(lb.debug && lb.debugView == 2 && !lb.pauseRender){
 			stroke(255);
 			strokeWeight(1);
 			if(boundary!=null){

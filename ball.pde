@@ -41,7 +41,7 @@ class Ball {
 		stateHistory.add(0, state);
 
 		// zobrazí predikovaný stav při přidávání nového míčku, lze tím dobře srovnávat úspěšnost predikce
-		if(lb.debug && lb.debugView == 0){
+		if(lb.debug && lb.debugView == 0 && !lb.pauseRender){
 			stroke(255, 0, 255);
 			noFill();
 			ellipse(predictedState.sposition.x, predictedState.sposition.y, predictedState.ssize.x, predictedState.ssize.y);
