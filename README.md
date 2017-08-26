@@ -7,7 +7,7 @@ Lightbeats je aplikace napsaná v [Processingu](https://processing.org/) pro tra
 - **Download:** [link na release](https://github.com/kukas/Lightbeats/releases)
 - **Dokumentace:** [uživatelská i programátorská dokumentace](https://github.com/kukas/Lightbeats/blob/master/docs/lightbeats_dokumentace.pdf)
 - **Repozitář:** [kukas/Lightbeats](http://github.com/kukas/Lightbeats) + [fork](http://github.com/gjkcz/Lightbeats) se stavem maturitní práce
-- **Autor:** [Jiří Balhar](http://kukas.homenet.org/)
+- **Autor:** [Jiří Balhar](http://jirkabalhar.cz/)
 - **Maturitní práce 2014/15** na [GJK](https://github.com/gjkcz/gjkcz)
 
 ## Dokumentace pro uživatele
@@ -21,7 +21,7 @@ Lightbeats má dva základní pohledy. Debug mód, který je přizpůsobený pro
 #### Základní nastavení
 Nastavit aplikaci je možné pouze při zapnutém debug módu. V levém horním rohu obrazovky se nachází tlačítka pro přepínání jednotlivých záložek nastavení. Pro základní nastavení aplikace stačí měnit nastavení v kategorii _camera settings_, případně v _other_. Pod přepínačem záložek se nachází také tlačítko pro uložení aktuálního nastavení.
 
-Podrobnější popis nastavení naleznete v [dokumentaci](https://github.com/kukas/Lightbeats/blob/master/docs/lightbeats_dokumentace.pdf)
+Podrobnější popis nastavení naleznete v [dokumentaci](docs/lightbeats_dokumentace.pdf)
 
 #### Klávesové zkratky
 * **ESC**: Ukončení programu.
@@ -39,11 +39,11 @@ Třída `Finder` (`finder.pde`) obsahuje algoritmus pro přesné hledání kruž
 
 Po třídění následuje vizualizace instancí třídy `Renderer` (`renderer.pde`).
 
-Podrobnější popis algoritmu naleznete v [dokumentaci](https://github.com/kukas/Lightbeats/blob/master/docs/lightbeats_dokumentace.pdf)
+Podrobnější popis algoritmu naleznete v [dokumentaci](docs/lightbeats_dokumentace.pdf)
 
 ## Screenshoty!
-![Animace z Lightbeats](http://kukas.homenet.org/lightbeats/animated.gif "Kachny!")
+![Animace z Lightbeats](docs/animated.gif "Kachny!")
 
-![Screenshot z debug módu](http://kukas.homenet.org/lightbeats/debug.jpg "Debug mód")
+![Screenshot z debug módu](docs/debug.jpg "Debug mód")
 
-![Screenshot vizualizace stop míčků](http://kukas.homenet.org/lightbeats/snail.jpg "Vizualizace stop")
+![Screenshot vizualizace stop míčků](docs/snail.jpg "Vizualizace stop")
